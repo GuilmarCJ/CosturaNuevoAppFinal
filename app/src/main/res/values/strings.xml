@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">COSTURA PRO</string>
+    <string name="login">INICIAR SESIÓN</string>
+    <string name="username">Usuario</string>
+    <string name="password">Contraseña</string>
+    <string name="enter">ENTRAR</string>
+    <string name="loading">Cargando...</string>
+    <string name="error_login">Usuario o contraseña incorrectos</string>
+    <string name="error_generic">Ha ocurrido un error</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Backup automático deshabilitado -->
+    <exclude domain="sharedpref" path="CosturaProPrefs"/>
+    <exclude domain="database" path="costura_pro_database"/>
+</full-backup-content>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Backup en la nube deshabilitado explícitamente -->
+        <exclude domain="sharedpref" path="CosturaProPrefs"/>
+        <exclude domain="database" path="costura_pro_database"/>
+    </cloud-backup>
+
+    <device-transfer>
+        <!-- Solo transferir la base de datos entre dispositivos -->
+        <include domain="database" path="costura_pro_database"/>
+    </device-transfer>
+</data-extraction-rules>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Operation Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_operations"
+                app:tint="@color/primary_color"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tvOperationName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Nombre Operación"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/tvPayment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="S/ 0.00 c/u"
+                android:textSize="14sp"
+                android:textColor="@color/success_green"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Quick Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnAddSmall"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="+10"
+                android:textAllCaps="false"
+                android:backgroundTint="@color/primary_color"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button" />
+
+            <Button
+                android:id="@+id/btnAddMedium"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="+25"
+                android:textAllCaps="false"
+                android:backgroundTint="@color/primary_dark"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp"
+                android:layout_marginStart="4dp"
+                style="@style/Widget.Material3.Button" />
+
+            <Button
+                android:id="@+id/btnAddLarge"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="+50"
+                android:textAllCaps="false"
+                android:backgroundTint="@color/primary_dark"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:layout_marginStart="4dp"
+                style="@style/Widget.Material3.Button" />
+
+        </LinearLayout>
+
+        <!-- Custom Quantity -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="12dp">
+
+            <Button
+                android:id="@+id/btnCustomMinus"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:text="-"
+                android:textSize="18sp"
+                android:backgroundTint="@color/light_gray"
+                android:textColor="@color/black"
+                style="@style/Widget.Material3.Button" />
+
+            <TextView
+                android:id="@+id/tvCustomQuantity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="0"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:padding="8dp"
+                android:background="@color/background_gray" />
+
+            <Button
+                android:id="@+id/btnCustomPlus"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:text="+"
+                android:textSize="18sp"
+                android:backgroundTint="@color/light_gray"
+                android:textColor="@color/black"
+                style="@style/Widget.Material3.Button" />
+
+            <Button
+                android:id="@+id/btnAddCustom"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="AGREGAR"
+                android:textAllCaps="false"
+                android:backgroundTint="@color/success_green"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:layout_marginStart="8dp"
+                style="@style/Widget.Material3.Button" />
+
+        </LinearLayout>
+
+        <!-- Today's Production -->
+        <TextView
+            android:id="@+id/tvTodayProduction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hoy: 0 unidades"
+            android:textSize="12sp"
+            android:textColor="@color/gray"
+            android:layout_marginTop="12dp" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

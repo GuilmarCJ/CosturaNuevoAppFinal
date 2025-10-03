@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "209158311885",
+    "project_id": "costurapro-dc43c",
+    "storage_bucket": "costurapro-dc43c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:209158311885:android:d7aecf0a7ddde83a673e84",
+        "android_client_info": {
+          "package_name": "com.costura.pro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEJWW3CnltfTf_UQuPfRoTWrATPN2hLz8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
