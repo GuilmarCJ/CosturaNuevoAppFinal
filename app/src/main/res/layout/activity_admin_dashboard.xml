@@ -255,6 +255,47 @@
 
                 </LinearLayout>
 
+                <!-- Añadir después del botón de Configuración -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/light_gray" />
+
+                <!-- Generar QR -->
+                <LinearLayout
+                    android:id="@+id/btnGenerateQR"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="20dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_qr_code"
+                        android:tint="@color/primary_color"
+                        android:layout_marginEnd="16dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="GENERAR CÓDIGOS QR"
+                        android:textSize="16sp"
+                        android:textColor="@color/black" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_right"
+                        android:tint="@color/gray" />
+
+                </LinearLayout>
+
+
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>

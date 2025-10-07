@@ -109,6 +109,20 @@
             android:textColor="@color/white"
             android:layout_marginTop="32dp" />
 
+        <!-- Añadir esto después del botón de logout -->
+        <Button
+            android:id="@+id/btnAttendance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="REGISTRO DE ASISTENCIA"
+            android:textAllCaps="false"
+            android:backgroundTint="@color/primary_color"
+            android:textColor="@color/white"
+            android:layout_marginTop="16dp"
+            android:drawableStart="@drawable/ic_time"
+            android:drawablePadding="8dp"
+            style="@style/Widget.Material3.Button" />
+
     </LinearLayout>
 
 </ScrollView>

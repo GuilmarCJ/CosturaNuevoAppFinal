@@ -4,6 +4,17 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Añadir estos permisos si no existen -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Para Android 10+ -->
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
 
     <application
         android:name=".CosturaProApp"
@@ -39,6 +50,12 @@
         <activity
             android:name=".ui.admin.ManageOperationsActivity"
             android:exported="false" />
+
+        <!-- Nuevas actividades para QR y Asistencia -->
+        <activity android:name=".ui.attendance.AttendanceActivity" android:exported="false"/>
+        <activity android:name=".ui.attendance.QRScannerActivity" android:exported="false"/>
+        <activity android:name=".ui.attendance.QRGeneratorActivity" android:exported="false"/>
+        <activity android:name=".ui.attendance.AttendanceHistoryActivity" android:exported="false"/>
 
     </application>
 

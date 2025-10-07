@@ -2,6 +2,7 @@ package com.costura.pro
 
 import android.app.Application
 import com.costura.pro.data.local.database.AppDatabase
+import com.costura.pro.data.repository.AttendanceRepository
 import com.costura.pro.data.repository.OperationRepository
 import com.costura.pro.data.repository.ProductionRepository
 import com.costura.pro.data.repository.UserRepository
@@ -16,6 +17,7 @@ class CosturaProApp : Application() {
     val userRepository: UserRepository by lazy { UserRepository(database.userDao()) }
     val operationRepository: OperationRepository by lazy { OperationRepository(database.operationDao()) }
     val productionRepository: ProductionRepository by lazy { ProductionRepository(database.productionDao()) }
+    val attendanceRepository: AttendanceRepository by lazy { AttendanceRepository(database.attendanceDao()) }
 
     override fun onCreate() {
         super.onCreate()
@@ -26,6 +28,7 @@ class CosturaProApp : Application() {
 
         // Initialize security checks
         initializeSecurity()
+
     }
 
     private fun initializeFirebase() {

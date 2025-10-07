@@ -71,4 +71,24 @@ dependencies {
 
     // Coroutines - SOLO UNA VEZ
     implementation(libs.kotlinx.coroutines.android)
+
+    // QR Code Generation
+    implementation("com.google.zxing:core:3.5.2")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
+    // CameraX para escanear QR
+    implementation("androidx.camera:camera-camera2:1.3.0")
+    implementation("androidx.camera:camera-lifecycle:1.3.0")
+    implementation("androidx.camera:camera-view:1.3.0")
+
+    // Permisos
+    implementation("com.guolindev.permissionx:permissionx:1.7.1")
+
+    // Fecha y hora
+    implementation("joda-time:joda-time:2.12.5")
+
+    // ML Kit - Barcode Scanning
+    implementation("com.google.mlkit:barcode-scanning:17.2.0")
+// ML Kit - Vision Common
+    implementation("com.google.mlkit:vision-common:17.3.0")
 }

@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.costura.pro.data.model.Operation
 import com.costura.pro.databinding.ActivityWorkerDashboardBinding
+import com.costura.pro.ui.attendance.AttendanceActivity
 import com.costura.pro.ui.auth.LoginActivity
 import com.costura.pro.utils.AppPreferences
 import com.costura.pro.utils.Constants
@@ -42,6 +43,10 @@ class WorkerDashboardActivity : AppCompatActivity() {
     private fun setupClickListeners() {
         binding.btnLogout.setOnClickListener {
             logout()
+        }
+        binding.btnAttendance.setOnClickListener {
+            val intent = Intent(this, AttendanceActivity::class.java)
+            startActivity(intent)
         }
     }
 
@@ -107,6 +112,7 @@ class WorkerDashboardActivity : AppCompatActivity() {
             }
     }
 
+
     private fun loadTotalEarned() {
         val workerId = preferences.userId ?: return
 
@@ -135,4 +141,6 @@ class WorkerDashboardActivity : AppCompatActivity() {
     private fun showLoading(show: Boolean) {
         binding.progressBar.visibility = if (show) android.view.View.VISIBLE else android.view.View.GONE
     }
+
+
 }

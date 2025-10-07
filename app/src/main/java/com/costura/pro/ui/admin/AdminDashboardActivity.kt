@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.costura.pro.databinding.ActivityAdminDashboardBinding
+import com.costura.pro.ui.attendance.QRGeneratorActivity
 import com.costura.pro.ui.auth.LoginActivity
 import com.costura.pro.utils.AppPreferences
 import com.costura.pro.utils.Constants
@@ -53,6 +54,11 @@ class AdminDashboardActivity : AppCompatActivity() {
 
         binding.btnLogout.setOnClickListener {
             logout()
+        }
+
+        binding.btnGenerateQR.setOnClickListener {
+            val intent = Intent(this, QRGeneratorActivity::class.java)
+            startActivity(intent)
         }
     }
 
