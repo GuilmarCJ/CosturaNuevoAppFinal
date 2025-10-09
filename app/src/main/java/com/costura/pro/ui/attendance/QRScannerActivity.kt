@@ -16,6 +16,10 @@ import com.costura.pro.utils.AppPreferences
 import com.costura.pro.utils.QRManager
 import com.journeyapps.barcodescanner.BarcodeCallback
 import com.journeyapps.barcodescanner.BarcodeResult
+
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
 
 class QRScannerActivity : AppCompatActivity() {
@@ -160,13 +164,14 @@ class QRScannerActivity : AppCompatActivity() {
                             Log.d(TAG, "✅ QR permanente detectado - procediendo con validación")
                             // QR permanente - usar el nuevo sistema de validación
                             if (validatePermanentQR(qrData)) {
+                                Log.d(TAG, "✅ QR válido - procediendo con registro")
                                 registerAttendance(qrData)
                             } else {
+                                Log.w(TAG, "❌ QR inválido - reiniciando escáner")
                                 resetScanner()
                             }
                         } else {
                             Log.w(TAG, "❌ QR temporal detectado")
-                            // QR temporal - mostrar información detallada
                             Toast.makeText(this, "Código QR temporal detectado. Genere un nuevo código QR permanente.", Toast.LENGTH_LONG).show()
                             resetScanner()
                         }
@@ -205,40 +210,66 @@ class QRScannerActivity : AppCompatActivity() {
         if (workerId != null) {
             showLoading(true)
 
-            // Aquí integrarías con el repository real
-            // Por ahora simulamos el registro
-            Thread {
+            // Obtener el repository desde la aplicación
+            val attendanceRepository = (application as com.costura.pro.CosturaProApp).attendanceRepository
+
+            // Usar coroutines para llamar al repository
+
+            lifecycleScope.launch {
                 try {
                     // Marcar el QR como usado
                     QRManager.markQRAsUsed(qrData)
 
-                    // Simular procesamiento
-                    Thread.sleep(1500)
-
-                    runOnUiThread {
-                        showLoading(false)
-                        Toast.makeText(this, "Asistencia registrada exitosamente", Toast.LENGTH_SHORT).show()
-
-                        val resultIntent = Intent().apply {
-                            putExtra("REGISTRATION_SUCCESS", true)
-                            putExtra("SCAN_TYPE", scanType)
+                    // Registrar en Firebase según el tipo de QR
+                    val success = when (scanType) {
+                        "ENTRY" -> {
+                            Log.d(TAG, "📝 Registrando ENTRADA en Firebase...")
+                            attendanceRepository.registerEntry(workerId, workerName)
                         }
-                        setResult(RESULT_OK, resultIntent)
-                        finish()
+                        "EXIT" -> {
+                            Log.d(TAG, "📝 Registrando SALIDA en Firebase...")
+                            attendanceRepository.registerExit(workerId)
+                        }
+                        else -> false
                     }
-                } catch (e: InterruptedException) {
+
                     runOnUiThread {
                         showLoading(false)
-                        Toast.makeText(this, "Error registrando asistencia", Toast.LENGTH_SHORT).show()
+                        if (success) {
+                            Log.d(TAG, "✅ Asistencia registrada exitosamente en Firebase")
+                            Toast.makeText(this@QRScannerActivity, "Asistencia registrada exitosamente", Toast.LENGTH_SHORT).show()
+
+                            val resultIntent = Intent().apply {
+                                putExtra("REGISTRATION_SUCCESS", true)
+                                putExtra("SCAN_TYPE", scanType)
+                            }
+                            setResult(RESULT_OK, resultIntent)
+                            finish()
+                        } else {
+                            Log.e(TAG, "❌ Error registrando asistencia en Firebase")
+                            Toast.makeText(this@QRScannerActivity, "Error registrando asistencia", Toast.LENGTH_SHORT).show()
+                            resetScanner()
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "❌ Excepción registrando asistencia", e)
+                    runOnUiThread {
+                        showLoading(false)
+                        Toast.makeText(this@QRScannerActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                         resetScanner()
                     }
                 }
-            }.start()
+            }
+
+
+
         } else {
             Toast.makeText(this, "Error: Usuario no identificado", Toast.LENGTH_SHORT).show()
             resetScanner()
         }
     }
+
+
 
     private fun startScanLineAnimation() {
         val animation = TranslateAnimation(

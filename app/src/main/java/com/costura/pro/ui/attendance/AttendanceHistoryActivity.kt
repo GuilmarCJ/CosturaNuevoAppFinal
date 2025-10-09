@@ -10,6 +10,12 @@ import com.costura.pro.data.model.AttendanceRecord
 import com.costura.pro.data.model.AttendanceStatus
 import com.costura.pro.databinding.ActivityAttendanceHistoryBinding
 import com.costura.pro.utils.AppPreferences
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import java.util.*
@@ -23,6 +29,13 @@ class AttendanceHistoryActivity : AppCompatActivity() {
 
     private var selectedMonth: DateTime = DateTime()
     private var selectedStatus: String = "ALL"
+
+    private val activityScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    override fun onDestroy() {
+        super.onDestroy()
+        activityScope.cancel()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,69 +79,46 @@ class AttendanceHistoryActivity : AppCompatActivity() {
     private fun loadAttendanceHistory() {
         showLoading(true)
 
-        // Simular carga de datos
-        Thread {
+        val workerId = preferences.userId ?: return
+
+        // Usar coroutines en lugar de Thread
+        activityScope.launch {
             try {
-                // Simular delay de red
-                Thread.sleep(1500)
-
-                val sampleData = generateSampleData()
-
-                runOnUiThread {
-                    showLoading(false)
-                    attendanceList.clear()
-                    attendanceList.addAll(sampleData)
-                    attendanceAdapter.notifyDataSetChanged()
-                    updateStatistics()
-                    updateEmptyState()
+                val realData = withContext(Dispatchers.IO) {
+                    getRealAttendanceHistory(workerId, selectedMonth)
                 }
+
+                showLoading(false)
+                attendanceList.clear()
+                attendanceList.addAll(realData)
+                attendanceAdapter.notifyDataSetChanged()
+                updateStatistics()
+                updateEmptyState()
             } catch (e: Exception) {
-                runOnUiThread {
-                    showLoading(false)
-                    Toast.makeText(this, "Error cargando historial", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }.start()
-    }
-
-    private fun generateSampleData(): List<AttendanceRecord> {
-        val records = mutableListOf<AttendanceRecord>()
-        val now = DateTime()
-
-        for (i in 0 until 30) {
-            val date = now.minusDays(i)
-            if (date.dayOfWeek in 1..5) { // Solo días laborables (lunes a viernes)
-                val status = when ((0..100).random()) {
-                    in 0..80 -> AttendanceStatus.PRESENT
-                    in 81..95 -> AttendanceStatus.LATE
-                    else -> AttendanceStatus.ABSENT
-                }
-
-                val entryTime = when (status) {
-                    AttendanceStatus.PRESENT -> "08:0${(0..5).random()}"
-                    AttendanceStatus.LATE -> "08:${(15..45).random()}"
-                    else -> null
-                }
-
-                val exitTime = if (entryTime != null) "17:${(0..59).random()}" else null
-
-                records.add(
-                    AttendanceRecord(
-                        date = date.toString("yyyy-MM-dd"),
-                        entryTime = entryTime ?: "--:--",
-                        exitTime = exitTime,
-                        status = status
-                    )
-                )
+                showLoading(false)
+                // En caso de error, mostrar lista vacía
+                attendanceList.clear()
+                attendanceAdapter.notifyDataSetChanged()
+                updateEmptyState()
+                Toast.makeText(this@AttendanceHistoryActivity, "No hay registros de asistencia", Toast.LENGTH_SHORT).show()
             }
         }
-
-        return records
     }
+
+    private suspend fun getRealAttendanceHistory(workerId: String, month: DateTime): List<AttendanceRecord> {
+        return try {
+            val repository = (application as com.costura.pro.CosturaProApp).attendanceRepository
+            repository.getAttendanceHistory(workerId, month)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+
 
     private fun showMonthPicker() {
         val currentYear = selectedMonth.year
-        val currentMonth = selectedMonth.monthOfYear - 1 // Calendar usa 0-11
+            val currentMonth = selectedMonth.monthOfYear - 1 // Calendar usa 0-11
 
         val datePicker = DatePickerDialog(
             this,

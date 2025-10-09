@@ -50,11 +50,10 @@ class AttendanceActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         timeTimer?.cancel()
-        activityScope.cancel() // Cancelar todas las coroutines al destruir la actividad
+        activityScope.cancel()
     }
 
     private fun setupUI() {
-        // Configurar toolbar si es necesario
         supportActionBar?.title = "Registro de Asistencia"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
@@ -92,7 +91,6 @@ class AttendanceActivity : AppCompatActivity() {
         val today = DateTime().toString("yyyy-MM-dd")
         val workerId = preferences.userId ?: return
 
-        // Usar el scope de la actividad en lugar de viewModelScope
         activityScope.launch {
             try {
                 // Cargar registro de hoy
@@ -156,45 +154,33 @@ class AttendanceActivity : AppCompatActivity() {
     private fun loadRecentAttendance(workerId: String) {
         activityScope.launch {
             try {
-                // Usar withContext para cambiar al dispatcher de IO para operaciones de red/BD
                 val recentRecords = withContext(Dispatchers.IO) {
-                    // Por ahora usamos datos de ejemplo hasta que implementemos el método real
-                    getSampleRecentAttendance()
+                    getRealRecentAttendance(workerId)
                 }
 
                 recentAttendanceList.clear()
                 recentAttendanceList.addAll(recentRecords)
                 attendanceAdapter.notifyDataSetChanged()
-
                 updateEmptyState()
             } catch (e: Exception) {
-                // Manejar error silenciosamente
+                recentAttendanceList.clear()
+                attendanceAdapter.notifyDataSetChanged()
+                updateEmptyState()
             }
         }
     }
 
-    // Método temporal hasta que implementemos el repository real
-    private fun getSampleRecentAttendance(): List<AttendanceRecord> {
-        return listOf(
-            AttendanceRecord(
-                date = DateTime().minusDays(1).toString("yyyy-MM-dd"),
-                entryTime = "08:05",
-                exitTime = "17:00",
-                status = AttendanceStatus.LATE
-            ),
-            AttendanceRecord(
-                date = DateTime().minusDays(2).toString("yyyy-MM-dd"),
-                entryTime = "07:55",
-                exitTime = "16:45",
-                status = AttendanceStatus.PRESENT
-            ),
-            AttendanceRecord(
-                date = DateTime().minusDays(3).toString("yyyy-MM-dd"),
-                entryTime = "08:10",
-                exitTime = "17:05",
-                status = AttendanceStatus.LATE
-            )
-        )
+    private suspend fun getRealRecentAttendance(workerId: String): List<AttendanceRecord> {
+        return try {
+            val repository = (application as com.costura.pro.CosturaProApp).attendanceRepository
+            val recentRecords = repository.getAttendanceHistory(workerId, DateTime())
+
+            recentRecords
+                .sortedByDescending { it.date }
+                .take(5)
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     private fun updateEmptyState() {
@@ -209,7 +195,6 @@ class AttendanceActivity : AppCompatActivity() {
 
     private fun startTimeUpdate() {
         updateTimeDisplay()
-
         timeTimer = fixedRateTimer("timeUpdater", false, 0, 1000) {
             Handler(Looper.getMainLooper()).post {
                 updateTimeDisplay()
@@ -221,23 +206,16 @@ class AttendanceActivity : AppCompatActivity() {
         val now = DateTime()
         val dateFormat = DateTimeFormat.forPattern("EEEE, d 'de' MMMM")
         val timeFormat = DateTimeFormat.forPattern("HH:mm:ss")
-
         binding.tvCurrentDate.text = dateFormat.print(now).replaceFirstChar { it.uppercase() }
         binding.tvCurrentTime.text = timeFormat.print(now)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (resultCode == RESULT_OK) {
             when (requestCode) {
-                REQUEST_QR_SCAN_ENTRY -> {
-                    Toast.makeText(this, "Entrada registrada exitosamente", Toast.LENGTH_SHORT).show()
-                    loadCurrentAttendance()
-                }
-                REQUEST_QR_SCAN_EXIT -> {
-                    Toast.makeText(this, "Salida registrada exitosamente", Toast.LENGTH_SHORT).show()
-                    loadCurrentAttendance()
+                REQUEST_QR_SCAN_ENTRY, REQUEST_QR_SCAN_EXIT -> {
+                    loadCurrentAttendance() // Recargar datos después de registrar
                 }
             }
         }

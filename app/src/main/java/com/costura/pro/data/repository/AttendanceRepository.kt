@@ -1,5 +1,6 @@
 package com.costura.pro.data.repository
 
+import android.util.Log
 import com.costura.pro.data.local.dao.AttendanceDao
 import com.costura.pro.data.local.entity.AttendanceEntity
 import com.costura.pro.data.model.AttendanceRecord
@@ -45,11 +46,13 @@ class AttendanceRepository(
             val date = now.toString("yyyy-MM-dd")
             val time = now.toString("HH:mm")
 
+            Log.d("AttendanceRepository", "🔄 Registrando entrada para $workerName ($workerId) a las $time")
+
             // Verificar si ya existe un registro para hoy
-            val existingRecord = attendanceDao.getAttendanceByWorkerAndDate(workerId, date)
+            val existingRecord = getAttendanceByWorkerAndDate(workerId, date)
 
             if (existingRecord != null) {
-                // Ya registró entrada hoy
+                Log.w("AttendanceRepository", "⚠️ Ya existe registro de entrada para hoy")
                 false
             } else {
                 // Determinar status (presente o tarde)
@@ -63,49 +66,133 @@ class AttendanceRepository(
 
                 val attendanceId = UUID.randomUUID().toString()
 
-                // Guardar localmente
-                val attendanceEntity = AttendanceEntity(
-                    id = attendanceId,
+                Log.d("AttendanceRepository", "📝 Creando registro con ID: $attendanceId, Status: $status")
+
+                // Guardar en Firebase directamente
+                val success = saveAttendanceToFirebase(
+                    attendanceId = attendanceId,
                     workerId = workerId,
                     workerName = workerName,
                     date = date,
                     entryTime = time,
                     exitTime = null,
-                    status = status.name,
-                    createdAt = System.currentTimeMillis(),
-                    isSynced = false
+                    status = status
                 )
 
-                attendanceDao.insertAttendance(attendanceEntity)
+                if (success) {
+                    Log.d("AttendanceRepository", "✅ Entrada guardada exitosamente en Firebase")
 
-                // Sincronizar con Firebase
-                syncToFirebase(attendanceEntity)
-                true
+                    // También guardar localmente para cache
+                    val attendanceEntity = AttendanceEntity(
+                        id = attendanceId,
+                        workerId = workerId,
+                        workerName = workerName,
+                        date = date,
+                        entryTime = time,
+                        exitTime = null,
+                        status = status.name,
+                        createdAt = System.currentTimeMillis(),
+                        isSynced = true // Ya está sincronizado
+                    )
+                    attendanceDao.insertAttendance(attendanceEntity)
+                } else {
+                    Log.e("AttendanceRepository", "❌ Error guardando en Firebase")
+                }
+
+                success
             }
         } catch (e: Exception) {
+            Log.e("AttendanceRepository", "❌ Excepción en registerEntry", e)
             false
         }
     }
+
 
     suspend fun registerExit(workerId: String): Boolean {
         return try {
             val today = DateTime().toString("yyyy-MM-dd")
             val currentTime = DateTime().toString("HH:mm")
 
-            val existingRecord = attendanceDao.getAttendanceByWorkerAndDate(workerId, today)
+            Log.d("AttendanceRepository", "🔄 Registrando salida para $workerId a las $currentTime")
+
+            val existingRecord = getAttendanceByWorkerAndDate(workerId, today)
 
             if (existingRecord != null && existingRecord.exitTime == null) {
-                // Actualizar salida
-                attendanceDao.updateExitTime(existingRecord.id, currentTime)
+                Log.d("AttendanceRepository", "📝 Actualizando salida para registro existente")
 
-                // Sincronizar con Firebase
-                val updatedEntity = existingRecord.copy(exitTime = currentTime)
-                syncToFirebase(updatedEntity)
-                true
+                // Actualizar en Firebase
+                val success = updateExitTimeInFirebase(existingRecord.id, currentTime)
+
+                if (success) {
+                    // Actualizar localmente
+                    attendanceDao.updateExitTime(existingRecord.id, currentTime)
+                    Log.d("AttendanceRepository", "✅ Salida registrada exitosamente")
+                } else {
+                    Log.e("AttendanceRepository", "❌ Error actualizando salida en Firebase")
+                }
+
+                success
             } else {
+                Log.w("AttendanceRepository", "⚠️ No se encontró registro de entrada para hoy o ya tiene salida")
                 false
             }
         } catch (e: Exception) {
+            Log.e("AttendanceRepository", "❌ Excepción en registerExit", e)
+            false
+        }
+    }
+
+
+    private suspend fun saveAttendanceToFirebase(
+        attendanceId: String,
+        workerId: String,
+        workerName: String,
+        date: String,
+        entryTime: String,
+        exitTime: String?,
+        status: AttendanceStatus
+    ): Boolean {
+        return try {
+            val attendanceData = hashMapOf(
+                "workerId" to workerId,
+                "workerName" to workerName,
+                "date" to date,
+                "entryTime" to entryTime,
+                "exitTime" to exitTime,
+                "status" to status.name,
+                "createdAt" to com.google.firebase.Timestamp.now(),
+                "updatedAt" to com.google.firebase.Timestamp.now()
+            )
+
+            db.collection(Constants.COLLECTION_ATTENDANCE)
+                .document(attendanceId)
+                .set(attendanceData)
+                .await()
+
+            Log.d("AttendanceRepository", "🔥 Registro guardado en Firebase: $attendanceId")
+            true
+        } catch (e: Exception) {
+            Log.e("AttendanceRepository", "❌ Error guardando en Firebase: ${e.message}")
+            false
+        }
+    }
+
+    private suspend fun updateExitTimeInFirebase(attendanceId: String, exitTime: String): Boolean {
+        return try {
+            val updates = hashMapOf<String, Any>(
+                "exitTime" to exitTime,
+                "updatedAt" to com.google.firebase.Timestamp.now()
+            )
+
+            db.collection(Constants.COLLECTION_ATTENDANCE)
+                .document(attendanceId)
+                .update(updates)
+                .await()
+
+            Log.d("AttendanceRepository", "🔥 Salida actualizada en Firebase: $attendanceId -> $exitTime")
+            true
+        } catch (e: Exception) {
+            Log.e("AttendanceRepository", "❌ Error actualizando salida en Firebase: ${e.message}")
             false
         }
     }
@@ -166,15 +253,18 @@ class AttendanceRepository(
 
     // Añadir estos métodos al AttendanceRepository existente
 
-    suspend fun getAttendanceHistory(workerId: String, month: DateTime): List<AttendanceRecord> {
+    // Añadir este método al AttendanceRepository
+    suspend fun getAttendanceHistory(workerId: String, endDate: DateTime): List<AttendanceRecord> {
         return try {
-            val startOfMonth = month.withDayOfMonth(1).toString("yyyy-MM-dd")
-            val endOfMonth = month.dayOfMonth().withMaximumValue().toString("yyyy-MM-dd")
+            val startDate = endDate.minusDays(30) // Últimos 30 días
+            val startDateStr = startDate.toString("yyyy-MM-dd")
+            val endDateStr = endDate.toString("yyyy-MM-dd")
 
             val documents = db.collection(Constants.COLLECTION_ATTENDANCE)
                 .whereEqualTo("workerId", workerId)
-                .whereGreaterThanOrEqualTo("date", startOfMonth)
-                .whereLessThanOrEqualTo("date", endOfMonth)
+                .whereGreaterThanOrEqualTo("date", startDateStr)
+                .whereLessThanOrEqualTo("date", endDateStr)
+                .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
                 .get()
                 .await()
 
@@ -189,9 +279,9 @@ class AttendanceRepository(
                     status = AttendanceStatus.valueOf(document.getString("status") ?: "ABSENT"),
                     createdAt = (document.get("createdAt") as? com.google.firebase.Timestamp)?.toDate() ?: Date()
                 )
-            }.sortedByDescending { it.date }
+            }
         } catch (e: Exception) {
-            emptyList()
+            emptyList() // Si hay error, retornar lista vacía
         }
     }
 
