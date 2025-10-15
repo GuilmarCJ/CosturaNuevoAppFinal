@@ -7,18 +7,24 @@
     android:gravity="center"
     android:padding="32dp"
     android:background="@color/white"
-    android:theme="@style/ThemeOverlay.AppCompat.Light">
+    android:theme="@style/ThemeOverlay.AppCompat.Light"
+    android:animateLayoutChanges="true">
 
-    <!-- Título principal -->
-
+    <!-- Logo con animación de escala -->
     <ImageView
+        android:id="@+id/ivLogo"
         android:layout_width="74dp"
         android:layout_height="99dp"
         android:layout_marginBottom="24dp"
         android:contentDescription="Logo Costura Pro"
-        android:src="@drawable/icono_costura" />
+        android:src="@drawable/icono_costura"
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:alpha="0" />
 
+    <!-- Título principal con animación de entrada -->
     <TextView
+        android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="COSTURA PRO"
@@ -26,29 +32,36 @@
         android:textStyle="bold"
         android:textColor="@color/primary_color"
         android:letterSpacing="0.05"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="8dp"
+        android:alpha="0"
+        android:translationY="20dp" />
 
     <!-- Subtítulo -->
     <TextView
+        android:id="@+id/tvSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Sistema de Gestión Textil"
         android:textSize="16sp"
         android:textColor="@color/gray"
-        android:alpha="0.9"
+        android:alpha="0"
         android:layout_marginBottom="32dp"
-        android:letterSpacing="0.02" />
+        android:letterSpacing="0.02"
+        android:translationY="10dp" />
 
-    <!-- Línea decorativa -->
+    <!-- Línea decorativa animada -->
     <View
-        android:layout_width="120dp"
+        android:id="@+id/divider"
+        android:layout_width="0dp"
         android:layout_height="3dp"
         android:background="@color/primary_color"
         android:layout_marginBottom="32dp"
-        android:alpha="0.8" />
+        android:alpha="0"
+        android:scaleX="0" />
 
-    <!-- Tarjeta de contenido -->
+    <!-- Tarjeta de contenido con animación -->
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardCornerRadius="20dp"
@@ -56,7 +69,9 @@
         app:cardBackgroundColor="@color/background_gray"
         android:layout_marginBottom="24dp"
         app:strokeColor="@color/light_gray"
-        app:strokeWidth="1dp">
+        app:strokeWidth="1dp"
+        android:alpha="0"
+        android:translationY="30dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -65,15 +80,17 @@
             android:padding="28dp"
             android:gravity="center">
 
-            <!-- Icono de usuario -->
+            <!-- Icono de usuario con animación -->
             <ImageView
+                android:id="@+id/ivUser"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@drawable/ic_person"
                 android:layout_marginBottom="20dp"
-                android:contentDescription="Icono usuario" />
+                android:contentDescription="Icono usuario"
+                android:rotation="0" />
 
-            <!-- Botón mejorado -->
+            <!-- Botón con animaciones -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
@@ -97,15 +114,18 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Información administrador -->
+    <!-- Información administrador con animación -->
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardAdmin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardCornerRadius="12dp"
         app:cardElevation="2dp"
         app:cardBackgroundColor="@color/white"
         app:strokeColor="@color/primary_color"
-        app:strokeWidth="1dp">
+        app:strokeWidth="1dp"
+        android:alpha="0"
+        android:translationY="20dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -136,11 +156,13 @@
 
     <!-- Footer -->
     <TextView
+        android:id="@+id/tvFooter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="v2.1.0 • © 2024 Costura Pro"
         android:textSize="11sp"
         android:textColor="@color/light_gray"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="24dp"
+        android:alpha="0" />
 
 </LinearLayout>
