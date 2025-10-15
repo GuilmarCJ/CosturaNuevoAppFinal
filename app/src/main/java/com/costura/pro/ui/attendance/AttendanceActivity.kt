@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.costura.pro.R
@@ -17,7 +18,6 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import java.util.*
 import kotlin.concurrent.fixedRateTimer
-
 class AttendanceActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAttendanceBinding
@@ -26,12 +26,24 @@ class AttendanceActivity : AppCompatActivity() {
     private val recentAttendanceList = mutableListOf<AttendanceRecord>()
     private var timeTimer: Timer? = null
 
-    // Obtener el repository desde la aplicación
+    // Nuevo sistema de Activity Result (reemplaza startActivityForResult)
+    private val qrScannerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            val actionType = data?.getStringExtra("ACTION_TYPE") ?: "asistencia"
+            val workerName = data?.getStringExtra("WORKER_NAME") ?: preferences.username ?: ""
+
+            Toast.makeText(this, "✅ $workerName registró $actionType automáticamente", Toast.LENGTH_LONG).show()
+            loadCurrentAttendance()
+        }
+    }
+
     private val attendanceRepository by lazy {
         (application as com.costura.pro.CosturaProApp).attendanceRepository
     }
 
-    // Coroutine scope para esta actividad
     private val activityScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +59,11 @@ class AttendanceActivity : AppCompatActivity() {
         startTimeUpdate()
     }
 
+    override fun onResume() {
+        super.onResume()
+        loadCurrentAttendance()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         timeTimer?.cancel()
@@ -56,35 +73,37 @@ class AttendanceActivity : AppCompatActivity() {
     private fun setupUI() {
         supportActionBar?.title = "Registro de Asistencia"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        val workerName = preferences.username ?: "Trabajador"
+        binding.tvWorkerName.text = "Hola, $workerName"
     }
 
     private fun setupClickListeners() {
         binding.btnRegisterEntry.setOnClickListener {
-            val intent = Intent(this, QRScannerActivity::class.java).apply {
-                putExtra("SCAN_TYPE", "ENTRY")
-            }
-            startActivityForResult(intent, REQUEST_QR_SCAN_ENTRY)
+            val intent = Intent(this, QRScannerActivity::class.java)
+            qrScannerLauncher.launch(intent)  // Usar nuevo sistema
         }
 
         binding.btnRegisterExit.setOnClickListener {
-            val intent = Intent(this, QRScannerActivity::class.java).apply {
-                putExtra("SCAN_TYPE", "EXIT")
-            }
-            startActivityForResult(intent, REQUEST_QR_SCAN_EXIT)
+            val intent = Intent(this, QRScannerActivity::class.java)
+            qrScannerLauncher.launch(intent)  // Usar nuevo sistema
         }
 
         binding.btnViewHistory.setOnClickListener {
             val intent = Intent(this, AttendanceHistoryActivity::class.java)
             startActivity(intent)
         }
+
+        binding.btnRefresh.setOnClickListener {
+            loadCurrentAttendance()
+            Toast.makeText(this, "Actualizando...", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setupRecyclerView() {
         attendanceAdapter = RecentAttendanceAdapter(recentAttendanceList)
-        binding.rvRecentAttendance.apply {
-            layoutManager = LinearLayoutManager(this@AttendanceActivity)
-            adapter = attendanceAdapter
-        }
+        binding.rvRecentAttendance.layoutManager = LinearLayoutManager(this)
+        binding.rvRecentAttendance.adapter = attendanceAdapter
     }
 
     private fun loadCurrentAttendance() {
@@ -93,30 +112,30 @@ class AttendanceActivity : AppCompatActivity() {
 
         activityScope.launch {
             try {
-                // Cargar registro de hoy
+                showLoading(true)
+
                 val todayRecord = attendanceRepository.getAttendanceByWorkerAndDate(workerId, today)
                 updateAttendanceUI(todayRecord)
-
-                // Cargar historial reciente
                 loadRecentAttendance(workerId)
+
             } catch (e: Exception) {
                 Toast.makeText(this@AttendanceActivity, "Error cargando asistencia", Toast.LENGTH_SHORT).show()
+            } finally {
+                showLoading(false)
             }
         }
     }
 
     private fun updateAttendanceUI(todayRecord: AttendanceRecord?) {
         if (todayRecord == null) {
-            // No ha registrado entrada hoy
             binding.tvStatus.text = "No has registrado entrada hoy"
             binding.tvStatusBadge.text = "AUSENTE"
-            binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_status_absent)
             binding.layoutEntryInfo.visibility = android.view.View.GONE
             binding.layoutExitInfo.visibility = android.view.View.GONE
             binding.btnRegisterEntry.isEnabled = true
             binding.btnRegisterExit.isEnabled = false
+            binding.tvInstructions.text = "Escanea el código QR para comenzar tu jornada"
         } else {
-            // Ya registró entrada
             binding.tvStatus.text = "Entrada registrada"
             binding.tvEntryTime.text = todayRecord.entryTime
             binding.layoutEntryInfo.visibility = android.view.View.VISIBLE
@@ -124,29 +143,26 @@ class AttendanceActivity : AppCompatActivity() {
             when (todayRecord.status) {
                 AttendanceStatus.PRESENT -> {
                     binding.tvStatusBadge.text = "PUNTUAL"
-                    binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_status_active)
                 }
                 AttendanceStatus.LATE -> {
                     binding.tvStatusBadge.text = "TARDÍO"
-                    binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_status_late)
                 }
                 else -> {
                     binding.tvStatusBadge.text = "PRESENTE"
-                    binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_status_active)
                 }
             }
 
             if (todayRecord.exitTime != null) {
-                // Ya registró salida
                 binding.tvStatus.text = "Jornada completada"
                 binding.tvExitTime.text = todayRecord.exitTime
                 binding.layoutExitInfo.visibility = android.view.View.VISIBLE
                 binding.btnRegisterEntry.isEnabled = false
                 binding.btnRegisterExit.isEnabled = false
+                binding.tvInstructions.text = "Jornada completada. ¡Hasta mañana!"
             } else {
-                // Solo entrada registrada
                 binding.btnRegisterEntry.isEnabled = false
                 binding.btnRegisterExit.isEnabled = true
+                binding.tvInstructions.text = "Escanea el código QR para registrar tu salida"
             }
         }
     }
@@ -155,7 +171,9 @@ class AttendanceActivity : AppCompatActivity() {
         activityScope.launch {
             try {
                 val recentRecords = withContext(Dispatchers.IO) {
-                    getRealRecentAttendance(workerId)
+                    attendanceRepository.getAttendanceHistory(workerId, DateTime())
+                        .sortedByDescending { it.date }
+                        .take(5)
                 }
 
                 recentAttendanceList.clear()
@@ -170,27 +188,9 @@ class AttendanceActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun getRealRecentAttendance(workerId: String): List<AttendanceRecord> {
-        return try {
-            val repository = (application as com.costura.pro.CosturaProApp).attendanceRepository
-            val recentRecords = repository.getAttendanceHistory(workerId, DateTime())
-
-            recentRecords
-                .sortedByDescending { it.date }
-                .take(5)
-        } catch (e: Exception) {
-            emptyList()
-        }
-    }
-
     private fun updateEmptyState() {
-        if (recentAttendanceList.isEmpty()) {
-            binding.tvEmptyHistory.visibility = android.view.View.VISIBLE
-            binding.rvRecentAttendance.visibility = android.view.View.GONE
-        } else {
-            binding.tvEmptyHistory.visibility = android.view.View.GONE
-            binding.rvRecentAttendance.visibility = android.view.View.VISIBLE
-        }
+        binding.tvEmptyHistory.visibility = if (recentAttendanceList.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+        binding.rvRecentAttendance.visibility = if (recentAttendanceList.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE
     }
 
     private fun startTimeUpdate() {
@@ -210,15 +210,9 @@ class AttendanceActivity : AppCompatActivity() {
         binding.tvCurrentTime.text = timeFormat.print(now)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK) {
-            when (requestCode) {
-                REQUEST_QR_SCAN_ENTRY, REQUEST_QR_SCAN_EXIT -> {
-                    loadCurrentAttendance() // Recargar datos después de registrar
-                }
-            }
-        }
+    private fun showLoading(show: Boolean) {
+        binding.progressBar.visibility = if (show) android.view.View.VISIBLE else android.view.View.GONE
+        binding.btnRefresh.isEnabled = !show
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -226,8 +220,5 @@ class AttendanceActivity : AppCompatActivity() {
         return true
     }
 
-    companion object {
-        const val REQUEST_QR_SCAN_ENTRY = 1001
-        const val REQUEST_QR_SCAN_EXIT = 1002
-    }
+    // ELIMINAR el método onActivityResult y las constantes REQUEST_QR_SCAN
 }

@@ -27,7 +27,5 @@ object Constants {
     const val WORK_START_TIME = "08:00"
     const val LATE_THRESHOLD_MINUTES = 15
 
-    // Añadir estas constantes
-    const val QR_VALIDITY_PERMANENT = "PERMANENT"
-    const val QR_VALIDITY_TEMPORARY = "TEMPORARY"
+
 }

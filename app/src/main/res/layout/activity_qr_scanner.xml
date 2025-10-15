@@ -13,19 +13,49 @@
         app:zxing_framing_rect_width="250dp"
         app:zxing_framing_rect_height="250dp" />
 
-    <!-- Overlay con marco de escaneo (el mismo que tenías) -->
+    <!-- Overlay con marco de escaneo -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="40dp">
 
-        <!-- Espacio superior -->
-        <View
+        <!-- Espacio superior con información -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="#80000000" />
+            android:orientation="vertical"
+            android:background="#80000000"
+            android:gravity="center"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/tvScanType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ENTRADA"
+                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:background="@drawable/bg_scan_type_header"
+                android:paddingHorizontal="24dp"
+                android:paddingVertical="12dp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Listo para escanear"
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:background="@drawable/bg_status_ready"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
 
         <!-- Área central con marco -->
         <RelativeLayout
@@ -44,7 +74,7 @@
 
         </RelativeLayout>
 
-        <!-- Espacio inferior -->
+        <!-- Espacio inferior con instrucciones -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -66,16 +96,14 @@
                 android:layout_marginBottom="16dp" />
 
             <TextView
-                android:id="@+id/tvScanType"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ENTRADA"
-                android:textSize="14sp"
-                android:textColor="@color/primary_color"
-                android:background="@drawable/bg_scan_type"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"
-                android:layout_marginBottom="20dp" />
+                android:text="🔹 El mismo QR sirve para todos los días\n🔹 Puedes usarlo múltiples veces"
+                android:textSize="12sp"
+                android:textColor="@color/light_gray"
+                android:gravity="center"
+                android:layout_marginBottom="20dp"
+                android:lineSpacingExtra="4dp" />
 
             <Button
                 android:id="@+id/btnCancel"

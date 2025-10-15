@@ -46,7 +46,7 @@ class AttendanceRepository(
             val date = now.toString("yyyy-MM-dd")
             val time = now.toString("HH:mm")
 
-            Log.d("AttendanceRepository", "🔄 Registrando entrada para $workerName ($workerId) a las $time")
+            Log.d("AttendanceRepository", "🔄 Registrando ENTRADA para $workerName ($workerId) a las $time")
 
             // Verificar si ya existe un registro para hoy
             val existingRecord = getAttendanceByWorkerAndDate(workerId, date)
@@ -95,11 +95,11 @@ class AttendanceRepository(
                         isSynced = true // Ya está sincronizado
                     )
                     attendanceDao.insertAttendance(attendanceEntity)
+                    true
                 } else {
                     Log.e("AttendanceRepository", "❌ Error guardando en Firebase")
+                    false
                 }
-
-                success
             }
         } catch (e: Exception) {
             Log.e("AttendanceRepository", "❌ Excepción en registerEntry", e)
@@ -107,13 +107,12 @@ class AttendanceRepository(
         }
     }
 
-
     suspend fun registerExit(workerId: String): Boolean {
         return try {
             val today = DateTime().toString("yyyy-MM-dd")
             val currentTime = DateTime().toString("HH:mm")
 
-            Log.d("AttendanceRepository", "🔄 Registrando salida para $workerId a las $currentTime")
+            Log.d("AttendanceRepository", "🔄 Registrando SALIDA para $workerId a las $currentTime")
 
             val existingRecord = getAttendanceByWorkerAndDate(workerId, today)
 
@@ -127,11 +126,11 @@ class AttendanceRepository(
                     // Actualizar localmente
                     attendanceDao.updateExitTime(existingRecord.id, currentTime)
                     Log.d("AttendanceRepository", "✅ Salida registrada exitosamente")
+                    true
                 } else {
                     Log.e("AttendanceRepository", "❌ Error actualizando salida en Firebase")
+                    false
                 }
-
-                success
             } else {
                 Log.w("AttendanceRepository", "⚠️ No se encontró registro de entrada para hoy o ya tiene salida")
                 false
@@ -141,7 +140,6 @@ class AttendanceRepository(
             false
         }
     }
-
 
     private suspend fun saveAttendanceToFirebase(
         attendanceId: String,
@@ -197,63 +195,19 @@ class AttendanceRepository(
         }
     }
 
-    private suspend fun syncToFirebase(attendance: AttendanceEntity) {
-        try {
-            val attendanceData = hashMapOf(
-                "workerId" to attendance.workerId,
-                "workerName" to attendance.workerName,
-                "date" to attendance.date,
-                "entryTime" to attendance.entryTime,
-                "exitTime" to attendance.exitTime,
-                "status" to attendance.status,
-                "createdAt" to com.google.firebase.Timestamp.now()
-            )
-
-            db.collection(Constants.COLLECTION_ATTENDANCE)
-                .document(attendance.id)
-                .set(attendanceData)
-                .await()
-
-            attendanceDao.markAsSynced(attendance.id)
-        } catch (e: Exception) {
-            // Error en sincronización, se intentará más tarde
-        }
-    }
-
-    suspend fun syncUnsyncedAttendance() {
-        try {
-            val unsyncedRecords = attendanceDao.getUnsyncedAttendance()
-
-            for (record in unsyncedRecords) {
-                syncToFirebase(record)
-            }
-        } catch (e: Exception) {
-            // Handle sync error
-        }
-    }
-
+    // NUEVO: Método simplificado para generar QR
     fun generateQRCodeData(type: QRType): String {
         val qrData = QRManager.generatePermanentQR(type)
         return qrData.toJsonString()
     }
 
-    fun parseQRCodeData(qrContent: String): com.costura.pro.data.model.QRCodeData? {
-        return com.costura.pro.data.model.QRCodeData.fromJsonString(qrContent)
+    fun parseQRCodeData(qrContent: String): QRCodeData? {
+        return QRCodeData.fromJsonString(qrContent)
     }
 
-    private fun handleQRRegistration(qrData: QRCodeData): Boolean {
-        return if (QRManager.isQRValid(qrData)) {
-            // Marcar QR como usado
-            QRManager.markQRAsUsed(qrData)
-            true
-        } else {
-            false
-        }
-    }
+    // ELIMINAR: handleQRRegistration ya no es necesario
 
-    // Añadir estos métodos al AttendanceRepository existente
-
-    // Añadir este método al AttendanceRepository
+    // Mantener estos métodos existentes...
     suspend fun getAttendanceHistory(workerId: String, endDate: DateTime): List<AttendanceRecord> {
         return try {
             val startDate = endDate.minusDays(30) // Últimos 30 días
@@ -281,11 +235,10 @@ class AttendanceRepository(
                 )
             }
         } catch (e: Exception) {
-            emptyList() // Si hay error, retornar lista vacía
+            emptyList()
         }
     }
 
-    // En AttendanceRepository.kt - Añadir este método
     suspend fun getAttendanceByWorkerAndDate(workerId: String, date: String): AttendanceRecord? {
         return try {
             val documents = db.collection(Constants.COLLECTION_ATTENDANCE)
@@ -336,4 +289,40 @@ class AttendanceRepository(
         val lateDays: Int,
         val absentDays: Int
     )
+
+    // Mantener métodos de sincronización...
+    private suspend fun syncToFirebase(attendance: AttendanceEntity) {
+        try {
+            val attendanceData = hashMapOf(
+                "workerId" to attendance.workerId,
+                "workerName" to attendance.workerName,
+                "date" to attendance.date,
+                "entryTime" to attendance.entryTime,
+                "exitTime" to attendance.exitTime,
+                "status" to attendance.status,
+                "createdAt" to com.google.firebase.Timestamp.now()
+            )
+
+            db.collection(Constants.COLLECTION_ATTENDANCE)
+                .document(attendance.id)
+                .set(attendanceData)
+                .await()
+
+            attendanceDao.markAsSynced(attendance.id)
+        } catch (e: Exception) {
+            // Error en sincronización, se intentará más tarde
+        }
+    }
+
+    suspend fun syncUnsyncedAttendance() {
+        try {
+            val unsyncedRecords = attendanceDao.getUnsyncedAttendance()
+
+            for (record in unsyncedRecords) {
+                syncToFirebase(record)
+            }
+        } catch (e: Exception) {
+            // Handle sync error
+        }
+    }
 }
