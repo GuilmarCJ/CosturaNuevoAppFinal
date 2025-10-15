@@ -15,5 +15,7 @@ data class ProductionEntity(
     val totalPayment: Double,
     val date: Long,
     val isSynced: Boolean = false,
-    val lastSync: Long = System.currentTimeMillis()
+    val lastSync: Long = System.currentTimeMillis(),
+    // Nuevo campo para organización mensual
+    val yearMonth: String // Formato: YYYY-MM para agrupamiento
 )

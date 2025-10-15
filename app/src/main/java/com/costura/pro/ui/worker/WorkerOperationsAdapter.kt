@@ -12,6 +12,12 @@ import com.costura.pro.data.model.Operation
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
+import com.google.firebase.Timestamp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+
 
 class WorkerOperationsAdapter(
     private val operations: List<Operation>,
@@ -20,7 +26,7 @@ class WorkerOperationsAdapter(
 ) : RecyclerView.Adapter<WorkerOperationsAdapter.OperationViewHolder>() {
 
     private val db = FirebaseFirestore.getInstance()
-    private val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    private val scope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OperationViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -98,28 +104,33 @@ class WorkerOperationsAdapter(
         }
 
         private fun loadTodayProduction(operationId: String) {
-            val startOfDay = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }.time
+            scope.launch {
+                try {
+                    val startOfDay = Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }.time
 
-            db.collection("production")
-                .whereEqualTo("workerId", workerId)
-                .whereEqualTo("operationId", operationId)
-                .whereGreaterThanOrEqualTo("date", com.google.firebase.Timestamp(startOfDay))
-                .get()
-                .addOnSuccessListener { documents ->
+                    val documents = db.collection("users")
+                        .document(workerId)
+                        .collection("production")
+                        .whereEqualTo("operationId", operationId)
+                        .whereGreaterThanOrEqualTo("date", Timestamp(startOfDay))
+                        .get()
+                        .await()
+
                     var todayTotal = 0
                     for (document in documents) {
-                        todayTotal += document.getLong("quantity")?.toInt() ?: 0
+                        val quantity = document.getLong("quantity")?.toInt() ?: 0
+                        todayTotal += quantity
                     }
                     tvTodayProduction.text = "Hoy: $todayTotal unidades"
-                }
-                .addOnFailureListener {
+                } catch (e: Exception) {
                     tvTodayProduction.text = "Hoy: 0 unidades"
                 }
+            }
         }
     }
 }

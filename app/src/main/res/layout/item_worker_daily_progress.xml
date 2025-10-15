@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header con nombre y estado -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvWorkerName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nombre Trabajador"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/tvWorkerModality"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Destajo"
+                    android:textSize="12sp"
+                    android:textColor="@color/gray" />
+            </LinearLayout>
+
+            <!-- Estado de asistencia -->
+            <TextView
+                android:id="@+id/tvAttendanceStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PRESENTE"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:background="@drawable/bg_status_present"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
+
+        <!-- Tiempos de entrada/salida -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Entrada"
+                    android:textSize="12sp"
+                    android:textColor="@color/gray" />
+
+                <TextView
+                    android:id="@+id/tvEntryTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="08:00"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Salida"
+                    android:textSize="12sp"
+                    android:textColor="@color/gray" />
+
+                <TextView
+                    android:id="@+id/tvExitTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--:--"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/gray" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Sección de Producción - SIMPLIFICADA -->
+        <LinearLayout
+            android:id="@+id/containerProduction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/light_primary"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="PRODUCCIÓN HOY:"
+                android:textSize="12sp"
+                android:textColor="@color/primary_color"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvDailyProduction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 unidades"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Ganancias y Horas -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="GANANCIA HOY"
+                    android:textSize="12sp"
+                    android:textColor="@color/gray" />
+
+                <TextView
+                    android:id="@+id/tvDailyEarnings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="S/ 0.00"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/success_green" />
+            </LinearLayout>
+
+            <!-- Horas trabajadas -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="end">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HORAS"
+                    android:textSize="12sp"
+                    android:textColor="@color/gray" />
+
+                <TextView
+                    android:id="@+id/tvHoursWorked"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--:--"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary_color" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

@@ -18,9 +18,9 @@ import com.costura.pro.data.local.entity.UserEntity
         UserEntity::class,
         OperationEntity::class,
         ProductionEntity::class,
-        AttendanceEntity::class  // AÑADIR ESTA LÍNEA
+        AttendanceEntity::class
     ],
-    version = 2,  // INCREMENTAR LA VERSIÓN
+    version = 3,  // INCREMENTAR VERSIÓN por cambios en esquema
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -28,7 +28,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun operationDao(): OperationDao
     abstract fun productionDao(): ProductionDao
-    abstract fun attendanceDao(): AttendanceDao  // AÑADIR ESTE MÉTODO
+    abstract fun attendanceDao(): AttendanceDao
 
     companion object {
         @Volatile
@@ -41,7 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "costura_pro_database"
                 )
-                    .fallbackToDestructiveMigration()  // AÑADIR ESTO PARA LA MIGRACIÓN
+                    .fallbackToDestructiveMigration()  // Para desarrollo, en producción usar migraciones
                     .build()
                 INSTANCE = instance
                 instance

@@ -13,8 +13,16 @@ interface ProductionDao {
     @Query("SELECT * FROM production_records WHERE workerId = :workerId AND date >= :startOfDay")
     fun getTodayProduction(workerId: String, startOfDay: Long): Flow<List<ProductionEntity>>
 
+    // NUEVO: Consulta por mes y año
+    @Query("SELECT * FROM production_records WHERE workerId = :workerId AND yearMonth = :yearMonth")
+    fun getProductionByWorkerAndMonth(workerId: String, yearMonth: String): Flow<List<ProductionEntity>>
+
     @Query("SELECT SUM(totalPayment) FROM production_records WHERE workerId = :workerId")
     suspend fun getTotalEarnings(workerId: String): Double?
+
+    // NUEVO: Ganancias por mes
+    @Query("SELECT SUM(totalPayment) FROM production_records WHERE workerId = :workerId AND yearMonth = :yearMonth")
+    suspend fun getMonthlyEarnings(workerId: String, yearMonth: String): Double?
 
     @Query("SELECT SUM(quantity) FROM production_records WHERE workerId = :workerId AND operationId = :operationId AND date >= :startOfDay")
     suspend fun getTodayQuantity(workerId: String, operationId: String, startOfDay: Long): Int?

@@ -24,7 +24,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="BIENVENIDO, ADMIN"
+                android:text="PANEL DE CONTROL"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@color/primary_color"
@@ -45,48 +45,6 @@
                 android:textColor="@color/gray"
                 android:layout_marginBottom="16dp" />
 
-            <!-- Total a Pagar Card -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="12dp"
-                android:background="@color/success_green"
-                android:padding="16dp"
-                android:elevation="2dp"
-                android:gravity="center_vertical">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_money"
-                    app:tint="@color/white"
-                    android:layout_marginEnd="12dp" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="TOTAL A PAGAR"
-                        android:textSize="12sp"
-                        android:textColor="@color/white" />
-
-                    <TextView
-                        android:id="@+id/tvTotalPayment"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="S/ 0.00"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/white" />
-                </LinearLayout>
-            </LinearLayout>
-
             <!-- Trabajadores Activos Card -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -95,7 +53,8 @@
                 android:background="@color/primary_color"
                 android:padding="16dp"
                 android:elevation="2dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
 
                 <ImageView
                     android:layout_width="24dp"
@@ -127,6 +86,52 @@
                         android:textColor="@color/white" />
                 </LinearLayout>
             </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Lista de Trabajadores con Avance Diario -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AVANCE DIARIO DE TRABAJADORES"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary_color"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Progress Bar mientras carga -->
+            <ProgressBar
+                android:id="@+id/progressWorkers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone" />
+
+            <!-- Contenedor de trabajadores -->
+            <LinearLayout
+                android:id="@+id/containerWorkers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <!-- Mensaje cuando no hay trabajadores -->
+            <TextView
+                android:id="@+id/tvNoWorkers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No hay trabajadores activos"
+                android:textSize="14sp"
+                android:textColor="@color/gray"
+                android:gravity="center"
+                android:padding="32dp"
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -255,7 +260,6 @@
 
                 </LinearLayout>
 
-                <!-- Añadir después del botón de Configuración -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
@@ -294,7 +298,6 @@
                         android:tint="@color/gray" />
 
                 </LinearLayout>
-
 
             </LinearLayout>
 
