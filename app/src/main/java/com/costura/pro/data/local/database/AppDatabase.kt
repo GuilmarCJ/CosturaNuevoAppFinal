@@ -5,10 +5,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.costura.pro.data.local.dao.AttendanceDao
+import com.costura.pro.data.local.dao.MachineDao
 import com.costura.pro.data.local.dao.OperationDao
 import com.costura.pro.data.local.dao.ProductionDao
 import com.costura.pro.data.local.dao.UserDao
 import com.costura.pro.data.local.entity.AttendanceEntity
+import com.costura.pro.data.local.entity.MachineEntity
 import com.costura.pro.data.local.entity.OperationEntity
 import com.costura.pro.data.local.entity.ProductionEntity
 import com.costura.pro.data.local.entity.UserEntity
@@ -18,9 +20,10 @@ import com.costura.pro.data.local.entity.UserEntity
         UserEntity::class,
         OperationEntity::class,
         ProductionEntity::class,
-        AttendanceEntity::class
+        AttendanceEntity::class,
+        MachineEntity::class
     ],
-    version = 3,  // INCREMENTAR VERSIÓN por cambios en esquema
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -29,6 +32,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun operationDao(): OperationDao
     abstract fun productionDao(): ProductionDao
     abstract fun attendanceDao(): AttendanceDao
+
+    abstract fun machineDao(): MachineDao
 
     companion object {
         @Volatile

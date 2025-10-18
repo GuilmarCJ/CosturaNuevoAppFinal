@@ -82,6 +82,11 @@ class AdminDashboardActivity : AppCompatActivity() {
             val intent = Intent(this, QRGeneratorActivity::class.java)
             startActivity(intent)
         }
+
+        binding.btnManageMachines.setOnClickListener {
+            val intent = Intent(this, ManageMachinesActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun loadDashboardData() {

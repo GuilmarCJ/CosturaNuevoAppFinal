@@ -3,6 +3,7 @@ package com.costura.pro
 import android.app.Application
 import com.costura.pro.data.local.database.AppDatabase
 import com.costura.pro.data.repository.AttendanceRepository
+import com.costura.pro.data.repository.MachineRepository
 import com.costura.pro.data.repository.OperationRepository
 import com.costura.pro.data.repository.ProductionRepository
 import com.costura.pro.data.repository.UserRepository
@@ -22,6 +23,8 @@ class CosturaProApp : Application() {
     val operationRepository: OperationRepository by lazy { OperationRepository(database.operationDao()) }
     val productionRepository: ProductionRepository by lazy { ProductionRepository(database.productionDao()) }
     val attendanceRepository: AttendanceRepository by lazy { AttendanceRepository(database.attendanceDao()) }
+
+    val machineRepository: MachineRepository by lazy { MachineRepository(database.machineDao()) }
 
     private val appScope = CoroutineScope(Dispatchers.IO)
 
