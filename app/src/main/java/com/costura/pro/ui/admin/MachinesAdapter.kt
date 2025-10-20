@@ -40,6 +40,8 @@ class MachinesAdapter(
         private val btnDelete: Button = itemView.findViewById(R.id.btnDelete)
         private val btnMaintenance: Button = itemView.findViewById(R.id.btnMaintenance)
 
+        private val btnHistory: Button = itemView.findViewById(R.id.btnHistory)
+
         fun bind(machine: MachineEntity) {
             tvMachineName.text = machine.name
             tvMachineNumber.text = "Nº: ${machine.machineNumber}"
@@ -79,6 +81,9 @@ class MachinesAdapter(
 
             btnMaintenance.setOnClickListener {
                 onMachineAction(machine, "maintenance")
+            }
+            btnHistory.setOnClickListener {
+                onMachineAction(machine, "history")
             }
         }
     }

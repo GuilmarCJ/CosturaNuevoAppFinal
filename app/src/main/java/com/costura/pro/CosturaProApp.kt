@@ -23,8 +23,9 @@ class CosturaProApp : Application() {
     val operationRepository: OperationRepository by lazy { OperationRepository(database.operationDao()) }
     val productionRepository: ProductionRepository by lazy { ProductionRepository(database.productionDao()) }
     val attendanceRepository: AttendanceRepository by lazy { AttendanceRepository(database.attendanceDao()) }
-
-    val machineRepository: MachineRepository by lazy { MachineRepository(database.machineDao()) }
+    val machineRepository: MachineRepository by lazy {
+        MachineRepository(database.machineDao(), database.machineHistoryDao())  // ACTUALIZADO
+    }
 
     private val appScope = CoroutineScope(Dispatchers.IO)
 

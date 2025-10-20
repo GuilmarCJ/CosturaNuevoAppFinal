@@ -56,6 +56,10 @@
             android:name=".ui.admin.ManageMachinesActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.admin.MachineHistoryActivity"
+            android:exported="false" />
+
         <!-- Nuevas actividades para QR y Asistencia -->
         <activity android:name=".ui.attendance.AttendanceActivity" android:exported="false"/>
         <activity android:name=".ui.attendance.QRScannerActivity" android:exported="false"/>

@@ -1,6 +1,7 @@
 package com.costura.pro.ui.admin
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -50,6 +51,7 @@ class ManageMachinesActivity : AppCompatActivity() {
                 "edit" -> showEditMachineDialog(machine)
                 "delete" -> showDeleteConfirmation(machine)
                 "maintenance" -> showMaintenanceDialog(machine)
+                "history" -> showMachineHistory(machine)  // NUEVO
             }
         }
         binding.rvMachines.apply {
@@ -62,6 +64,13 @@ class ManageMachinesActivity : AppCompatActivity() {
         binding.btnAddMachine.setOnClickListener {
             showAddMachineDialog()
         }
+    }
+
+    private fun showMachineHistory(machine: MachineEntity) {
+        val intent = Intent(this, MachineHistoryActivity::class.java)
+        // Puedes pasar el machineId si quieres filtrar por máquina específica
+        // intent.putExtra("MACHINE_ID", machine.id)
+        startActivity(intent)
     }
 
     private fun loadMachines() {

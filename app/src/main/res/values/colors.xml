@@ -24,4 +24,7 @@
     <!-- AGREGAR ESTOS COLORES FALTANTES -->
     <color name="dark_success_green">#1B5E20</color>
     <color name="dark_error_red">#B71C1C</color>
+    <color name="info_blue">#2196F3</color>
+    <color name="light_success">#E8F5E8</color>
+
 </resources>

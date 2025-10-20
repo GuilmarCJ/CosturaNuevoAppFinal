@@ -13,7 +13,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Header con nombre y estado -->
+        <!-- Header con máquina y fecha -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
                     android:id="@+id/tvMachineName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nombre Máquina"
+                    android:text="Máquina Overlock"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/black" />
@@ -40,98 +40,90 @@
                     android:id="@+id/tvMachineNumber"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nº: 0001"
-                    android:textSize="14sp"
+                    android:text="Nº: 001"
+                    android:textSize="12sp"
                     android:textColor="@color/gray" />
             </LinearLayout>
 
-            <!-- Estado de la máquina -->
+            <!-- Tipo de evento -->
             <TextView
-                android:id="@+id/tvMachineStatus"
+                android:id="@+id/tvEventType"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="OPERATIVA"
+                android:text="PROBLEMA"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="4dp"
-                android:background="@drawable/bg_status_active"
+                android:background="@drawable/bg_status_late"
                 android:textColor="@color/white" />
 
         </LinearLayout>
 
-        <!-- Tipo y descripción -->
+        <!-- Fecha -->
         <TextView
-            android:id="@+id/tvMachineType"
+            android:id="@+id/tvDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tipo: Overlock"
+            android:text="18 Oct 2025 - 10:30 AM"
             android:textSize="12sp"
             android:textColor="@color/gray"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginBottom="8dp" />
 
-        <TextView
-            android:id="@+id/tvMachineDescription"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Descripción de la máquina"
-            android:textSize="12sp"
-            android:textColor="@color/gray"
-            android:layout_marginBottom="12dp" />
-
-        <!-- Botones de acción -->
+        <!-- Descripción del problema -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:orientation="vertical"
+            android:background="@color/light_primary"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp">
 
-            <!-- Botón Editar -->
-            <Button
-                android:id="@+id/btnEdit"
-                android:layout_width="0dp"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="4dp"
-                android:text="EDITAR"
+                android:text="DESCRIPCIÓN DEL PROBLEMA:"
                 android:textSize="12sp"
-                android:backgroundTint="@color/primary_color"
-                android:textColor="@color/white" />
+                android:textColor="@color/primary_color"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp" />
 
-            <!-- Botón Eliminar -->
-            <Button
-                android:id="@+id/btnDelete"
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/tvProblemDescription"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginHorizontal="4dp"
-                android:text="ELIMINAR"
-                android:textSize="12sp"
-                android:backgroundTint="@color/error_red"
-                android:textColor="@color/white" />
+                android:text="La máquina no enhebra correctamente"
+                android:textSize="14sp"
+                android:textColor="@color/black" />
 
-            <!-- Botón Problemas/Reparado -->
-            <Button
-                android:id="@+id/btnMaintenance"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                android:text="PROBLEMAS"
-                android:textSize="12sp"
-                android:backgroundTint="@color/warning_orange"
-                android:textColor="@color/white" />
+        </LinearLayout>
 
-            <Button
-                android:id="@+id/btnHistory"
-                android:layout_width="0dp"
+        <!-- Solución (solo visible para problemas resueltos) -->
+        <LinearLayout
+            android:id="@+id/containerSolution"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/light_success"
+            android:padding="12dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                android:text="HISTORIAL"
+                android:text="SOLUCIÓN APLICADA:"
                 android:textSize="12sp"
-                android:backgroundTint="@color/info_blue"
-                android:textColor="@color/white" />
+                android:textColor="@color/success_green"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tvSolution"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Se cambió la aguja y se lubricó"
+                android:textSize="14sp"
+                android:textColor="@color/black" />
 
         </LinearLayout>
 
