@@ -14,6 +14,7 @@ import com.costura.pro.data.local.entity.AttendanceEntity
 import com.costura.pro.data.local.entity.MachineEntity
 import com.costura.pro.data.local.entity.MachineHistoryEntity
 import com.costura.pro.data.local.entity.OperationEntity
+
 import com.costura.pro.data.local.entity.ProductionEntity
 import com.costura.pro.data.local.entity.UserEntity
 
@@ -26,7 +27,7 @@ import com.costura.pro.data.local.entity.UserEntity
         MachineEntity::class,
         MachineHistoryEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -38,6 +39,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun machineDao(): MachineDao
     abstract fun machineHistoryDao(): MachineHistoryDao
+
 
     companion object {
         @Volatile

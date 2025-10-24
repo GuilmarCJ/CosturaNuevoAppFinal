@@ -7,24 +7,40 @@
     <color name="teal_700">#FF018786</color>
 
     <!-- Nuevos colores -->
-    <color name="primary_color">#2196F3</color>
-    <color name="success_green">#4CAF50</color>
+
     <color name="error_red">#F44336</color>
     <color name="warning_orange">#FF9800</color>
-    <color name="background_gray">#F5F5F5</color>
-    <color name="light_gray">#E0E0E0</color>
-    <color name="gray">#9E9E9E</color>
-    <color name="white">#FFFFFF</color>
-    <color name="black">#000000</color>
 
-    <!-- En res/values/colors.xml -->
+
+
     <color name="primary_dark">#1976D2</color>
     <color name="light_primary">#E3F2FD</color>
 
-    <!-- AGREGAR ESTOS COLORES FALTANTES -->
+
     <color name="dark_success_green">#1B5E20</color>
     <color name="dark_error_red">#B71C1C</color>
-    <color name="info_blue">#2196F3</color>
+
     <color name="light_success">#E8F5E8</color>
+
+
+
+    <color name="primary_color">#2196F3</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="gray">#757575</color>
+    <color name="light_gray">#F5F5F5</color>
+    <color name="background_gray">#FAFAFA</color>
+
+    <!-- Colores para el editor de Excel -->
+    <color name="warning_light">#FFF9C4</color>
+    <color name="holo_green_light">#99CC00</color>
+    <color name="success_green">#4CAF50</color>
+    <color name="info_blue">#2196F3</color>
+    <color name="red_light">#FF5252</color>
+    <color name="green_light">#4CAF50</color>
+    <color name="red_dark">#D32F2F</color>
+
+    <color name="purple">#9C27B0</color>
+    <color name="brown">#795548</color>
 
 </resources>

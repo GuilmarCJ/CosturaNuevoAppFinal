@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_gray"
+    android:padding="16dp">
+
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/white"
+        app:title="HOJA EXCEL"
+        app:titleTextColor="@color/black" />
+
+    <!-- Contenido -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <!-- Icono Excel -->
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/ic_excel"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Título -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HOJA DE CÁLCULO EXCEL"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary_color"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Descripción -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Crea y gestiona hojas de cálculo Excel completas con listas de trabajo, precios y cantidades."
+            android:textSize="16sp"
+            android:textColor="@color/gray"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp"
+            android:layout_marginBottom="32dp"
+            android:paddingHorizontal="16dp" />
+
+        <!-- Botón Crear Excel -->
+        <Button
+            android:id="@+id/btnCreateExcel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="CREAR NUEVO EXCEL"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:backgroundTint="@color/success_green"
+            android:textColor="@color/white"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.Material3.Button" />
+
+        <!-- Botón Cargar Excel -->
+        <Button
+            android:id="@+id/btnLoadExcel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ABRIR EXCEL EXISTENTE"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:backgroundTint="@color/primary_color"
+            android:textColor="@color/white"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        <!-- Información ACTUALIZADA -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📊 Crea listas de trabajo completas\n📈 Calcula precios automáticamente\n💾 Guarda en formato .xls\n📤 Comparte con otras apps"
+            android:textSize="14sp"
+            android:textColor="@color/gray"
+            android:gravity="center"
+            android:lineSpacingExtra="8dp"
+            android:layout_marginTop="32dp"
+            android:paddingHorizontal="16dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

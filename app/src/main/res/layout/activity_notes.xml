@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/primary_color"
+        app:title="BLOC DE NOTAS"
+        app:titleTextColor="@color/white" />
+
+    <!-- Barra de estado -->
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Listo - 0 palabras"
+        android:textSize="12sp"
+        android:background="@color/light_gray"
+        android:padding="8dp"
+        android:gravity="center" />
+
+    <!-- Barra de herramientas principal -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/background_gray"
+        android:padding="8dp">
+
+        <Button
+            android:id="@+id/btnNewNote"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📄 NUEVO"
+            android:textSize="10sp"
+            android:layout_marginEnd="2dp"
+            android:backgroundTint="@color/info_blue" />
+
+        <Button
+            android:id="@+id/btnSaveNote"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="💾 GUARDAR"
+            android:textSize="10sp"
+            android:layout_marginHorizontal="2dp"
+            android:backgroundTint="@color/success_green" />
+
+        <Button
+            android:id="@+id/btnLoadNote"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📂 CARGAR"
+            android:textSize="10sp"
+            android:layout_marginHorizontal="2dp"
+            android:backgroundTint="@color/primary_color" />
+
+        <Button
+            android:id="@+id/btnShareNote"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📤 COMPARTIR"
+            android:textSize="10sp"
+            android:layout_marginStart="2dp"
+            android:backgroundTint="@color/info_blue" />
+
+    </LinearLayout>
+
+    <!-- Barra de herramientas de formato -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/light_gray"
+        android:padding="4dp">
+
+        <Button
+            android:id="@+id/btnFormatText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🎨 FORMATO"
+            android:textSize="9sp"
+            android:layout_marginEnd="1dp"
+            android:backgroundTint="#FF9800" />
+
+        <Button
+            android:id="@+id/btnFindReplace"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🔍 BUSCAR"
+            android:textSize="9sp"
+            android:layout_marginHorizontal="1dp"
+            android:backgroundTint="#9C27B0" />
+
+        <Button
+            android:id="@+id/btnWordCount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📊 CONTAR"
+            android:textSize="9sp"
+            android:layout_marginHorizontal="1dp"
+            android:backgroundTint="#607D8B" />
+
+        <Button
+            android:id="@+id/btnInsertTemplate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📋 PLANTILLA"
+            android:textSize="9sp"
+            android:layout_marginHorizontal="1dp"
+            android:backgroundTint="#795548" />
+
+        <Button
+            android:id="@+id/btnExportPdf"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📄 EXPORTAR"
+            android:textSize="9sp"
+            android:layout_marginStart="1dp"
+            android:backgroundTint="#F44336" />
+
+    </LinearLayout>
+
+    <!-- Botón configuración flotante -->
+    <Button
+        android:id="@+id/btnSettings"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:text="⚙️"
+        android:textSize="16sp"
+        android:layout_gravity="end"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/primary_color"
+        android:elevation="8dp" />
+
+    <!-- Área de texto principal -->
+    <EditText
+        android:id="@+id/etNoteContent"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:hint="Escribe tus notas aquí..."
+        android:gravity="top"
+        android:padding="16dp"
+        android:background="@null"
+        android:textSize="16sp"
+        android:lineSpacingExtra="4dp"
+        android:scrollbars="vertical"
+        android:isScrollContainer="true" />
+
+    <!-- Footer informativo -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 Consejo: Usa plantillas para listas de trabajo • Ctrl+F para buscar • Auto-guardado automático"
+        android:textSize="10sp"
+        android:textColor="@color/gray"
+        android:gravity="center"
+        android:padding="8dp"
+        android:background="@color/light_gray" />
+
+</LinearLayout>

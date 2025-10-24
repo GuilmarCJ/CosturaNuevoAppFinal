@@ -1,5 +1,6 @@
 package com.costura.pro.ui.admin
 
+import androidx.core.content.ContextCompat
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -85,6 +86,15 @@ class AdminDashboardActivity : AppCompatActivity() {
 
         binding.btnManageMachines.setOnClickListener {
             val intent = Intent(this, ManageMachinesActivity::class.java)
+            startActivity(intent)
+        }
+        binding.btnExcel.setOnClickListener {
+            val intent = Intent(this, ExcelActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.btnNotes.setOnClickListener {
+            val intent = Intent(this, NotesActivity::class.java)
             startActivity(intent)
         }
     }
