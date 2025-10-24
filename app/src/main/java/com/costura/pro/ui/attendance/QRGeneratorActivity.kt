@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -20,13 +21,13 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import java.util.*
 
+
+
 class QRGeneratorActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityQrGeneratorBinding
     private lateinit var attendanceRepository: AttendanceRepository
-    private var currentQRType: QRType = QRType.ENTRY
     private var currentQRBitmap: Bitmap? = null
-    private var currentUniqueId: String = ""
 
     companion object {
         private const val TAG = "QRGeneratorActivity"
@@ -38,7 +39,6 @@ class QRGeneratorActivity : AppCompatActivity() {
         binding = ActivityQrGeneratorBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Obtener repository desde la aplicación
         attendanceRepository = (application as com.costura.pro.CosturaProApp).attendanceRepository
 
         setupUI()
@@ -47,35 +47,27 @@ class QRGeneratorActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        supportActionBar?.title = "Generador de QR Permanente"
+        supportActionBar?.title = "Generador de QR Universal"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         updateTimeDisplay()
 
-        // Actualizar textos para QR permanente
-        binding.tvExpireTime.text = "PERMANENTE"
-        binding.tvExpireTime.setTextColor(ContextCompat.getColor(this, R.color.success_green))
+        binding.tvExpireTime.text = "UNIVERSAL - ENTRADA/SALIDA"
+        binding.tvQrInfo.text = "Este código QR sirve para ENTRADA y SALIDA automáticamente"
+
+        binding.rgQrType.visibility = View.GONE
     }
 
     private fun setupClickListeners() {
-        binding.rgQrType.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                R.id.rbEntry -> {
-                    currentQRType = QRType.ENTRY
-                    generateQRCode()
-                }
-                R.id.rbExit -> {
-                    currentQRType = QRType.EXIT
-                    generateQRCode()
-                }
-            }
-        }
-
         binding.btnGenerate.setOnClickListener {
             generateQRCode()
         }
 
         binding.btnShare.setOnClickListener {
             shareQRCode()
+        }
+
+        binding.btnSaveToGallery.setOnClickListener {
+            saveQRToGallery()
         }
     }
 
@@ -84,19 +76,12 @@ class QRGeneratorActivity : AppCompatActivity() {
 
         Thread {
             try {
-                // Generar ID único para este QR
-                currentUniqueId = UUID.randomUUID().toString()
-
-                // Crear datos del QR permanente
                 val qrData = QRCodeData(
-                    type = currentQRType,
-                    locationId = "costura_pro",
-                    uniqueId = currentUniqueId,
-                    isPermanent = true
+                    locationId = "costura_pro"
                 )
 
                 val qrContent = qrData.toJsonString()
-                Log.d(TAG, "Generando QR con contenido: $qrContent")
+                Log.d(TAG, "Generando QR UNIVERSAL con contenido: $qrContent")
 
                 val qrBitmap = generateQRCodeBitmap(qrContent)
 
@@ -104,16 +89,13 @@ class QRGeneratorActivity : AppCompatActivity() {
                     showLoading(false)
                     currentQRBitmap = qrBitmap
                     binding.ivQrCode.setImageBitmap(qrBitmap)
-                    updateQRTypeUI()
+                    updateQRInfoUI()
                     updateTimeDisplay()
 
-                    Toast.makeText(this, "Código QR permanente generado", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "✅ Código QR universal generado", Toast.LENGTH_SHORT).show()
 
-                    // Mostrar en log el contenido generado
-                    Log.d(TAG, "✅ QR PERMANENTE GENERADO:")
-                    Log.d(TAG, "Tipo: ${qrData.type}")
-                    Log.d(TAG, "UniqueId: ${qrData.uniqueId}")
-                    Log.d(TAG, "Permanente: ${qrData.isPermanent}")
+                    Log.d(TAG, "✅ QR UNIVERSAL GENERADO:")
+                    Log.d(TAG, "Location: ${qrData.locationId}")
                     Log.d(TAG, "JSON: $qrContent")
                 }
             } catch (e: Exception) {
@@ -147,44 +129,45 @@ class QRGeneratorActivity : AppCompatActivity() {
         return bitmap
     }
 
-    private fun updateQRTypeUI() {
-        val typeText = when (currentQRType) {
-            QRType.ENTRY -> "ENTRADA PERMANENTE"
-            QRType.EXIT -> "SALIDA PERMANENTE"
-        }
+    private fun updateQRInfoUI() {
+        binding.tvQrType.text = "QR UNIVERSAL"
+        binding.tvQrType.setTextColor(ContextCompat.getColor(this, R.color.primary_color))
 
-        val typeColor = when (currentQRType) {
-            QRType.ENTRY -> R.color.success_green
-            QRType.EXIT -> R.color.error_red
-        }
-
-        binding.tvQrType.text = typeText
-        binding.tvQrType.setTextColor(ContextCompat.getColor(this, typeColor))
+        binding.tvInstructions.text = "Los trabajadores escanearán este QR para registrar ENTRADA o SALIDA automáticamente"
     }
 
     private fun updateTimeDisplay() {
         val timeFormat = DateTimeFormat.forPattern("HH:mm:ss")
-        binding.tvGeneratedTime.text = timeFormat.print(DateTime())
+        val dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy")
+        binding.tvGeneratedTime.text = "${dateFormat.print(DateTime())} ${timeFormat.print(DateTime())}"
     }
 
+    // ui/attendance/QRGeneratorActivity.kt - corregir las funciones
     private fun shareQRCode() {
-        currentQRBitmap?.let { bitmap ->
+        currentQRBitmap?.let { _ ->  // Cambiar 'bitmap' por '_'
             try {
-                // Información adicional para compartir
                 val qrInfo = """
-                    Código QR Permanente - Costura Pro
-                    Tipo: ${if (currentQRType == QRType.ENTRY) "ENTRADA" else "SALIDA"}
-                    ID: $currentUniqueId
-                    Generado: ${DateTime().toString("dd/MM/yyyy HH:mm:ss")}
-                    
-                    Este código QR es permanente y no expira.
-                """.trimIndent()
+                📋 CÓDIGO QR UNIVERSAL - COSTURA PRO
+                
+                🔹 Tipo: UNIVERSAL (Entrada/Salida)
+                🔹 Ubicación: Costura Pro
+                🔹 Generado: ${DateTime().toString("dd/MM/yyyy HH:mm:ss")}
+                🔹 Estado: PERMANENTE Y REUTILIZABLE
+                
+                📝 INSTRUCCIONES:
+                • Imprimir este código QR
+                • Pegarlo en la entrada/salida
+                • Los trabajadores lo escanean diariamente
+                • El sistema decide automáticamente si es entrada o salida
+                
+                💡 Funciona para ENTRADA y SALIDA automáticamente
+            """.trimIndent()
 
                 val shareIntent = Intent().apply {
                     action = Intent.ACTION_SEND
                     type = "text/plain"
                     putExtra(Intent.EXTRA_TEXT, qrInfo)
-                    putExtra(Intent.EXTRA_SUBJECT, "Código QR Permanente - Costura Pro")
+                    putExtra(Intent.EXTRA_SUBJECT, "Código QR Universal - Costura Pro")
                 }
 
                 startActivity(Intent.createChooser(shareIntent, "Compartir código QR"))
@@ -197,10 +180,24 @@ class QRGeneratorActivity : AppCompatActivity() {
         }
     }
 
+    private fun saveQRToGallery() {
+        currentQRBitmap?.let { _ ->  // Cambiar 'bitmap' por '_'
+            try {
+                Toast.makeText(this, "Función de guardar en galería próximamente", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this, "Error guardando QR", Toast.LENGTH_SHORT).show()
+            }
+        } ?: run {
+            Toast.makeText(this, "Primero genera un código QR", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
     private fun showLoading(show: Boolean) {
-        binding.progressBar.visibility = if (show) android.view.View.VISIBLE else android.view.View.GONE
+        binding.progressBar.visibility = if (show) View.VISIBLE else View.GONE
         binding.btnGenerate.isEnabled = !show
         binding.btnShare.isEnabled = !show
+        binding.btnSaveToGallery.isEnabled = !show
     }
 
     override fun onSupportNavigateUp(): Boolean {

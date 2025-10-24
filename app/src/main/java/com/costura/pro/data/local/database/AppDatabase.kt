@@ -5,11 +5,16 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.costura.pro.data.local.dao.AttendanceDao
+import com.costura.pro.data.local.dao.MachineDao
+import com.costura.pro.data.local.dao.MachineHistoryDao
 import com.costura.pro.data.local.dao.OperationDao
 import com.costura.pro.data.local.dao.ProductionDao
 import com.costura.pro.data.local.dao.UserDao
 import com.costura.pro.data.local.entity.AttendanceEntity
+import com.costura.pro.data.local.entity.MachineEntity
+import com.costura.pro.data.local.entity.MachineHistoryEntity
 import com.costura.pro.data.local.entity.OperationEntity
+
 import com.costura.pro.data.local.entity.ProductionEntity
 import com.costura.pro.data.local.entity.UserEntity
 
@@ -18,9 +23,11 @@ import com.costura.pro.data.local.entity.UserEntity
         UserEntity::class,
         OperationEntity::class,
         ProductionEntity::class,
-        AttendanceEntity::class  // AÑADIR ESTA LÍNEA
+        AttendanceEntity::class,
+        MachineEntity::class,
+        MachineHistoryEntity::class
     ],
-    version = 2,  // INCREMENTAR LA VERSIÓN
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -28,7 +35,11 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun operationDao(): OperationDao
     abstract fun productionDao(): ProductionDao
-    abstract fun attendanceDao(): AttendanceDao  // AÑADIR ESTE MÉTODO
+    abstract fun attendanceDao(): AttendanceDao
+
+    abstract fun machineDao(): MachineDao
+    abstract fun machineHistoryDao(): MachineHistoryDao
+
 
     companion object {
         @Volatile
@@ -41,7 +52,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "costura_pro_database"
                 )
-                    .fallbackToDestructiveMigration()  // AÑADIR ESTO PARA LA MIGRACIÓN
+                    .fallbackToDestructiveMigration()  // Para desarrollo, en producción usar migraciones
                     .build()
                 INSTANCE = instance
                 instance

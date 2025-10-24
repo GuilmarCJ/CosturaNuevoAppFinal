@@ -37,7 +37,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Genera códigos QR permanentes para registro de asistencia"
+                    android:text="Genera códigos QR permanentes y reutilizables"
                     android:textSize="14sp"
                     android:textColor="@color/gray" />
 
@@ -62,7 +62,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="TIPO DE CÓDIGO QR"
+                    android:text="SELECCIONAR TIPO"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/black"
@@ -86,7 +86,7 @@
                             android:id="@+id/rbEntry"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Entrada"
+                            android:text="ENTRADA"
                             android:textSize="14sp"
                             android:buttonTint="@color/success_green"
                             android:padding="16dp"
@@ -106,7 +106,7 @@
                             android:id="@+id/rbExit"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Salida"
+                            android:text="SALIDA"
                             android:textSize="14sp"
                             android:buttonTint="@color/error_red"
                             android:padding="16dp" />
@@ -119,7 +119,7 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Información del Código -->
+        <!-- Información del QR -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -136,12 +136,48 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="INFORMACIÓN"
+                    android:text="INFORMACIÓN DEL QR"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/black"
                     android:layout_marginBottom="12dp" />
 
+                <!-- Tipo seleccionado -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_qr_code"
+                        app:tint="@color/primary_color"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tipo:"
+                        android:textSize="14sp"
+                        android:textColor="@color/gray" />
+
+                    <TextView
+                        android:id="@+id/tvQrType"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="ENTRADA PERMANENTE"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/success_green"
+                        android:layout_marginStart="8dp" />
+
+                </LinearLayout>
+
+                <!-- Tiempo de generación -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -168,7 +204,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="--:--:--"
+                        android:text="--/--/---- --:--:--"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:textColor="@color/black"
@@ -176,16 +212,18 @@
 
                 </LinearLayout>
 
+                <!-- Validez -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
 
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:src="@drawable/ic_expire"
+                        android:src="@drawable/ic_infinite"
                         app:tint="@color/success_green"
                         android:layout_marginEnd="8dp" />
 
@@ -201,13 +239,61 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="PERMANENTE"
+                        android:text="PERMANENTE - REUTILIZABLE"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:textColor="@color/success_green"
                         android:layout_marginStart="8dp" />
 
                 </LinearLayout>
+
+                <!-- Información adicional -->
+                <TextView
+                    android:id="@+id/tvQrInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Este código QR puede ser usado múltiples veces por todos los trabajadores"
+                    android:textSize="12sp"
+                    android:textColor="@color/gray"
+                    android:layout_marginTop="8dp"
+                    android:lineSpacingExtra="4dp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Instrucciones específicas -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            android:backgroundTint="@color/light_primary">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💡 INSTRUCCIONES DE USO"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary_color"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/tvInstructions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Los trabajadores escanearán este QR para registrar su ENTRADA diaria"
+                    android:textSize="12sp"
+                    android:textColor="@color/black"
+                    android:lineSpacingExtra="4dp" />
 
             </LinearLayout>
 
@@ -230,23 +316,20 @@
 
                 <ImageView
                     android:id="@+id/ivQrCode"
-                    android:layout_width="250dp"
-                    android:layout_height="250dp"
+                    android:layout_width="280dp"
+                    android:layout_height="280dp"
                     android:background="@color/white"
-                    android:padding="8dp" />
+                    android:padding="4dp"
+                    android:contentDescription="Código QR generado" />
 
                 <TextView
-                    android:id="@+id/tvQrType"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ENTRADA"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_color"
+                    android:text="🔸 Imprimir y pegar en la pared 🔸"
+                    android:textSize="12sp"
+                    android:textColor="@color/gray"
                     android:layout_marginTop="16dp"
-                    android:background="@drawable/bg_qr_type"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="8dp" />
+                    android:textStyle="italic" />
 
             </LinearLayout>
 
@@ -256,34 +339,51 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btnGenerate"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="GENERAR NUEVO"
-                android:textAllCaps="false"
-                android:backgroundTint="@color/primary_color"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                android:layout_marginEnd="8dp"
-                style="@style/Widget.Material3.Button" />
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/btnGenerate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="GENERAR NUEVO"
+                    android:textAllCaps="false"
+                    android:backgroundTint="@color/primary_color"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="4dp"
+                    style="@style/Widget.Material3.Button" />
+
+                <Button
+                    android:id="@+id/btnSaveToGallery"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="GUARDAR"
+                    android:textAllCaps="false"
+                    android:backgroundTint="@color/warning_orange"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:layout_marginStart="4dp"
+                    style="@style/Widget.Material3.Button" />
+
+            </LinearLayout>
 
             <Button
                 android:id="@+id/btnShare"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="COMPARTIR"
+                android:text="COMPARTIR CÓDIGO QR"
                 android:textAllCaps="false"
                 android:backgroundTint="@color/success_green"
                 android:textColor="@color/white"
                 android:textSize="16sp"
-                android:layout_marginStart="8dp"
-                android:drawableStart="@drawable/ic_share"
-                android:drawablePadding="8dp"
                 style="@style/Widget.Material3.Button" />
 
         </LinearLayout>

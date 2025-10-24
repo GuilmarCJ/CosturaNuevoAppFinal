@@ -1,5 +1,4 @@
 package com.costura.pro.ui.attendance
-
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,14 +12,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.costura.pro.databinding.ActivityQrScannerBinding
 import com.costura.pro.utils.AppPreferences
-import com.costura.pro.utils.QRManager
+import com.costura.pro.data.model.QRCodeData
+import com.costura.pro.data.model.QRType
 import com.journeyapps.barcodescanner.BarcodeCallback
 import com.journeyapps.barcodescanner.BarcodeResult
-
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
+import androidx.lifecycle.lifecycleScope
+import org.joda.time.DateTime
+import kotlinx.coroutines.launch
 
 class QRScannerActivity : AppCompatActivity() {
 
@@ -28,7 +27,6 @@ class QRScannerActivity : AppCompatActivity() {
     private lateinit var preferences: AppPreferences
     private lateinit var barcodeView: DecoratedBarcodeView
 
-    private var scanType: String = "ENTRY"
     private var isProcessing = false
 
     companion object {
@@ -45,11 +43,8 @@ class QRScannerActivity : AppCompatActivity() {
         setupUI()
         setupClickListeners()
 
-        // Obtener tipo de escaneo
-        scanType = intent.getStringExtra("SCAN_TYPE") ?: "ENTRY"
         updateScanTypeUI()
 
-        // Inicializar el escáner
         barcodeView = binding.barcodeScanner
 
         if (allPermissionsGranted()) {
@@ -88,17 +83,8 @@ class QRScannerActivity : AppCompatActivity() {
     }
 
     private fun updateScanTypeUI() {
-        binding.tvScanType.text = when (scanType) {
-            "ENTRY" -> "REGISTRAR ENTRADA"
-            "EXIT" -> "REGISTRAR SALIDA"
-            else -> "ENTRADA"
-        }
-
-        binding.tvScanInstruction.text = when (scanType) {
-            "ENTRY" -> "Escanea el código QR para registrar tu entrada"
-            "EXIT" -> "Escanea el código QR para registrar tu salida"
-            else -> "Escanea el código QR"
-        }
+        binding.tvScanType.text = "REGISTRO AUTOMÁTICO"
+        binding.tvScanInstruction.text = "Escanea el código QR para registrar entrada o salida automáticamente"
     }
 
     private fun allPermissionsGranted(): Boolean {
@@ -138,116 +124,75 @@ class QRScannerActivity : AppCompatActivity() {
     }
 
     private fun handleScannedQRCode(qrContent: String) {
-        Log.d(TAG, "QR Code scanned: $qrContent")
+        Log.d(TAG, "QR Code escaneado: $qrContent")
 
         runOnUiThread {
             try {
-                // Parsear el contenido del QR
-                val qrData = com.costura.pro.data.model.QRCodeData.fromJsonString(qrContent)
+                val qrData = QRCodeData.fromJsonString(qrContent)
 
                 if (qrData != null) {
-                    Log.d(TAG, "✅ QR parseado correctamente:")
-                    Log.d(TAG, "   - Tipo: ${qrData.type}")
-                    Log.d(TAG, "   - Permanente: ${qrData.isPermanent}")
-                    Log.d(TAG, "   - UniqueId: ${qrData.uniqueId}")
+                    Log.d(TAG, "✅ QR universal parseado correctamente")
                     Log.d(TAG, "   - LocationId: ${qrData.locationId}")
 
-                    // Verificar que el tipo de QR coincida con la acción
-                    val isValidType = when (scanType) {
-                        "ENTRY" -> qrData.type == com.costura.pro.data.model.QRType.ENTRY
-                        "EXIT" -> qrData.type == com.costura.pro.data.model.QRType.EXIT
-                        else -> false
-                    }
-
-                    if (isValidType) {
-                        if (qrData.isPermanent) {
-                            Log.d(TAG, "✅ QR permanente detectado - procediendo con validación")
-                            // QR permanente - usar el nuevo sistema de validación
-                            if (validatePermanentQR(qrData)) {
-                                Log.d(TAG, "✅ QR válido - procediendo con registro")
-                                registerAttendance(qrData)
-                            } else {
-                                Log.w(TAG, "❌ QR inválido - reiniciando escáner")
-                                resetScanner()
-                            }
-                        } else {
-                            Log.w(TAG, "❌ QR temporal detectado")
-                            Toast.makeText(this, "Código QR temporal detectado. Genere un nuevo código QR permanente.", Toast.LENGTH_LONG).show()
-                            resetScanner()
-                        }
-                    } else {
-                        Log.w(TAG, "❌ Tipo de QR incorrecto. Esperado: $scanType, Recibido: ${qrData.type}")
-                        Toast.makeText(this, "Código QR incorrecto para esta acción. Esperado: $scanType", Toast.LENGTH_LONG).show()
-                        resetScanner()
-                    }
+                    registerAttendanceAutomatically()
                 } else {
                     Log.e(TAG, "❌ No se pudo parsear el QR: $qrContent")
-                    Toast.makeText(this, "Código QR inválido o formato incorrecto", Toast.LENGTH_LONG).show()
-                    resetScanner()
+                    showErrorMessage("Código QR inválido o formato incorrecto")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Error procesando código QR", e)
-                Toast.makeText(this, "Error procesando código QR: ${e.message}", Toast.LENGTH_LONG).show()
-                resetScanner()
+                showErrorMessage("Error procesando código QR: ${e.message}")
             }
         }
     }
 
-    private fun resetScanner() {
-        isProcessing = false
-        // Reiniciar el escáner después de un breve delay
-        binding.barcodeScanner.postDelayed({
-            if (!isFinishing) {
-                startScanner()
-            }
-        }, 2000)
-    }
-
-    private fun registerAttendance(qrData: com.costura.pro.data.model.QRCodeData) {
+    private fun registerAttendanceAutomatically() {
         val workerId = preferences.userId
         val workerName = preferences.username ?: "Trabajador"
 
         if (workerId != null) {
             showLoading(true)
 
-            // Obtener el repository desde la aplicación
             val attendanceRepository = (application as com.costura.pro.CosturaProApp).attendanceRepository
-
-            // Usar coroutines para llamar al repository
 
             lifecycleScope.launch {
                 try {
-                    // Marcar el QR como usado
-                    QRManager.markQRAsUsed(qrData)
+                    // LÓGICA AUTOMÁTICA: decidir si es entrada o salida
+                    val today = DateTime().toString("yyyy-MM-dd")
+                    val existingRecord = attendanceRepository.getAttendanceByWorkerAndDate(workerId, today)
 
-                    // Registrar en Firebase según el tipo de QR
-                    val success = when (scanType) {
-                        "ENTRY" -> {
-                            Log.d(TAG, "📝 Registrando ENTRADA en Firebase...")
-                            attendanceRepository.registerEntry(workerId, workerName)
-                        }
-                        "EXIT" -> {
-                            Log.d(TAG, "📝 Registrando SALIDA en Firebase...")
-                            attendanceRepository.registerExit(workerId)
-                        }
-                        else -> false
+                    val (success, actionType) = if (existingRecord == null || existingRecord.exitTime != null) {
+                        // No tiene entrada hoy o ya tiene salida → REGISTRAR ENTRADA
+                        Log.d(TAG, "📝 Registrando ENTRADA automática para $workerName...")
+                        val result = attendanceRepository.registerEntry(workerId, workerName)
+                        Pair(result, "entrada")
+                    } else {
+                        // Tiene entrada sin salida → REGISTRAR SALIDA
+                        Log.d(TAG, "📝 Registrando SALIDA automática para $workerName...")
+                        val result = attendanceRepository.registerExit(workerId)
+                        Pair(result, "salida")
                     }
 
                     runOnUiThread {
                         showLoading(false)
                         if (success) {
-                            Log.d(TAG, "✅ Asistencia registrada exitosamente en Firebase")
-                            Toast.makeText(this@QRScannerActivity, "Asistencia registrada exitosamente", Toast.LENGTH_SHORT).show()
+                            Log.d(TAG, "✅ $actionType registrada automáticamente")
+
+                            showSuccessMessage("✅ $actionType registrada automáticamente")
 
                             val resultIntent = Intent().apply {
                                 putExtra("REGISTRATION_SUCCESS", true)
-                                putExtra("SCAN_TYPE", scanType)
+                                putExtra("ACTION_TYPE", actionType)
+                                putExtra("WORKER_NAME", workerName)
                             }
                             setResult(RESULT_OK, resultIntent)
-                            finish()
+
+                            binding.root.postDelayed({
+                                finish()
+                            }, 1500)
                         } else {
-                            Log.e(TAG, "❌ Error registrando asistencia en Firebase")
-                            Toast.makeText(this@QRScannerActivity, "Error registrando asistencia", Toast.LENGTH_SHORT).show()
+                            Log.e(TAG, "❌ Error registrando $actionType")
+                            showErrorMessage("Error registrando $actionType. Verifica tu estado actual.")
                             resetScanner()
                         }
                     }
@@ -255,21 +200,25 @@ class QRScannerActivity : AppCompatActivity() {
                     Log.e(TAG, "❌ Excepción registrando asistencia", e)
                     runOnUiThread {
                         showLoading(false)
-                        Toast.makeText(this@QRScannerActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                        showErrorMessage("Error de conexión: ${e.message}")
                         resetScanner()
                     }
                 }
             }
-
-
-
         } else {
-            Toast.makeText(this, "Error: Usuario no identificado", Toast.LENGTH_SHORT).show()
+            showErrorMessage("Error: Usuario no identificado")
             resetScanner()
         }
     }
 
-
+    private fun resetScanner() {
+        isProcessing = false
+        binding.barcodeScanner.postDelayed({
+            if (!isFinishing) {
+                startScanner()
+            }
+        }, 3000)
+    }
 
     private fun startScanLineAnimation() {
         val animation = TranslateAnimation(
@@ -288,24 +237,21 @@ class QRScannerActivity : AppCompatActivity() {
     private fun showLoading(show: Boolean) {
         binding.progressBar.visibility = if (show) android.view.View.VISIBLE else android.view.View.GONE
         binding.btnCancel.isEnabled = !show
+
+        if (show) {
+            binding.tvStatus.text = "Procesando..."
+        } else {
+            binding.tvStatus.text = "Listo para escanear"
+        }
     }
 
-    private fun validatePermanentQR(qrData: com.costura.pro.data.model.QRCodeData): Boolean {
-        // Verificar que el QR sea válido según el manager
-        if (!QRManager.isQRValid(qrData)) {
-            Toast.makeText(this, "Este código QR ya ha sido utilizado", Toast.LENGTH_LONG).show()
-            return false
-        }
+    private fun showSuccessMessage(message: String) {
+        binding.tvStatus.text = message
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
 
-        // Aquí puedes añadir más validaciones según tu negocio
-        // Por ejemplo, verificar locationId, tipo de usuario, etc.
-
-        // Verificar que sea un QR permanente
-        if (!qrData.isPermanent) {
-            Toast.makeText(this, "Este código QR no es permanente", Toast.LENGTH_LONG).show()
-            return false
-        }
-
-        return true
+    private fun showErrorMessage(message: String) {
+        binding.tvStatus.text = message
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 }

@@ -69,7 +69,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
 
-    // Coroutines - SOLO UNA VEZ
+    // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
     // QR Code Generation
@@ -89,6 +89,17 @@ dependencies {
 
     // ML Kit - Barcode Scanning
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
-// ML Kit - Vision Common
     implementation("com.google.mlkit:vision-common:17.3.0")
+
+    // Apache POI para Excel - VERSIÓN COMPATIBLE 3.17 con exclusiones
+    implementation("org.apache.poi:poi:3.17") {
+        exclude(group = "org.apache.xmlbeans", module = "xmlbeans")
+    }
+    implementation("org.apache.poi:poi-ooxml:3.17") {
+        exclude(group = "org.apache.xmlbeans", module = "xmlbeans")
+        exclude(group = "dom4j", module = "dom4j")
+    }
+
+    // Dexter para permisos
+    implementation("com.karumi:dexter:6.2.3")
 }

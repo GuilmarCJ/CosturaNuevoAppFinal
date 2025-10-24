@@ -17,6 +17,10 @@ interface AttendanceDao {
     @Query("SELECT * FROM attendance_records WHERE date = :date ORDER BY entryTime DESC")
     fun getAttendanceByDate(date: String): Flow<List<AttendanceEntity>>
 
+    // NUEVO: Consulta por mes y año
+    @Query("SELECT * FROM attendance_records WHERE workerId = :workerId AND yearMonth = :yearMonth ORDER BY date DESC")
+    fun getAttendanceByWorkerAndMonth(workerId: String, yearMonth: String): Flow<List<AttendanceEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAttendance(attendance: AttendanceEntity)
 

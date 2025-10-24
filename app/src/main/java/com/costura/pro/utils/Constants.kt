@@ -7,12 +7,11 @@ object Constants {
     const val KEY_USER_ROLE = "user_role"
     const val KEY_USERNAME = "username"
 
-    // Firebase Collections
+    // Firebase Collections - NUEVA ESTRUCTURA
     const val COLLECTION_USERS = "users"
-    const val COLLECTION_WORKERS = "workers"
+    const val SUBCOLLECTION_ATTENDANCE = "attendance"
+    const val SUBCOLLECTION_PRODUCTION = "production"
     const val COLLECTION_OPERATIONS = "operations"
-    const val COLLECTION_PRODUCTION = "production"
-    const val COLLECTION_ATTENDANCE = "attendance"
 
     // Default Admin Credentials
     const val ADMIN_USERNAME = "admin"
@@ -27,7 +26,8 @@ object Constants {
     const val WORK_START_TIME = "08:00"
     const val LATE_THRESHOLD_MINUTES = 15
 
-    // Añadir estas constantes
-    const val QR_VALIDITY_PERMANENT = "PERMANENT"
-    const val QR_VALIDITY_TEMPORARY = "TEMPORARY"
+    // Formatos de fecha para organización
+    const val DATE_FORMAT = "yyyy-MM-dd"
+    const val YEAR_MONTH_FORMAT = "yyyy-MM"
+    const val TIME_FORMAT = "HH:mm"
 }

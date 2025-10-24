@@ -26,13 +26,22 @@
                 android:padding="24dp">
 
                 <TextView
+                    android:id="@+id/tvWorkerName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hola, Trabajador"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary_color"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="REGISTRO DE ASISTENCIA"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_color"
-                    android:layout_marginBottom="8dp" />
+                    android:textSize="14sp"
+                    android:textColor="@color/gray"
+                    android:layout_marginBottom="12dp" />
 
                 <TextView
                     android:id="@+id/tvCurrentDate"
@@ -70,20 +79,37 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ESTADO ACTUAL"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/black"
-                    android:layout_marginBottom="12dp" />
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="ESTADO ACTUAL"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/black" />
+
+                    <ImageButton
+                        android:id="@+id/btnRefresh"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_refresh"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Actualizar" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="12px">
 
                     <ImageView
                         android:id="@+id/ivStatusIcon"
@@ -193,6 +219,17 @@
                         android:layout_marginStart="8dp" />
 
                 </LinearLayout>
+
+                <!-- Instrucciones -->
+                <TextView
+                    android:id="@+id/tvInstructions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Escanea el código QR de ENTRADA para comenzar tu jornada"
+                    android:textSize="12sp"
+                    android:textColor="@color/gray"
+                    android:layout_marginTop="12dp"
+                    android:lineSpacingExtra="4dp" />
 
             </LinearLayout>
 
@@ -317,6 +354,14 @@
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="16dp"
+            android:visibility="gone" />
 
     </LinearLayout>
 

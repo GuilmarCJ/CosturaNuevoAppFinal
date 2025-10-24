@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/primary_color"
+        app:title="Editor de CSV"
+        app:titleTextColor="@color/white" />
+
+    <!-- Header informativo -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/light_gray"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/tvFileInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Información del archivo"
+            android:textSize="12sp"
+            android:textColor="@color/gray" />
+
+        <TextView
+            android:id="@+id/tvCalculations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cálculos: "
+            android:textSize="10sp"
+            android:textColor="@color/info_blue"
+            android:layout_marginTop="4dp" />
+
+    </LinearLayout>
+
+    <!-- Barra de búsqueda -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="@color/background_gray">
+
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Buscar..."
+            android:padding="8dp" />
+
+        <Button
+            android:id="@+id/btnSearch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔍"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
+
+    <!-- Controles de edición (visible solo en modo edición) -->
+    <LinearLayout
+        android:id="@+id/layoutEditControls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/warning_light"
+        android:padding="8dp"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/btnAddRow"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="➕ Fila"
+            android:textSize="12sp"
+            android:layout_marginEnd="4dp"
+            android:backgroundTint="@color/success_green" />
+
+        <Button
+            android:id="@+id/btnAddColumn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="➕ Columna"
+            android:textSize="12sp"
+            android:layout_marginHorizontal="4dp"
+            android:backgroundTint="@color/info_blue" />
+
+        <Button
+            android:id="@+id/btnCalculate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📊 Calcular"
+            android:textSize="12sp"
+            android:layout_marginStart="4dp"
+            android:backgroundTint="@color/primary_color" />
+
+    </LinearLayout>
+
+    <!-- Barra de herramientas principal -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/background_gray"
+        android:padding="8dp">
+
+        <Button
+            android:id="@+id/btnEditMode"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="MODO EDICIÓN"
+            android:textSize="12sp"
+            android:layout_marginEnd="4dp"
+            android:backgroundTint="@color/holo_green_light" />
+
+        <Button
+            android:id="@+id/btnSaveFile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="💾 GUARDAR"
+            android:textSize="12sp"
+            android:layout_marginHorizontal="4dp"
+            android:backgroundTint="@color/success_green" />
+
+        <Button
+            android:id="@+id/btnShareFile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📤 COMPARTIR"
+            android:textSize="12sp"
+            android:layout_marginHorizontal="4dp"
+            android:backgroundTint="@color/info_blue" />
+
+        <Button
+            android:id="@+id/btnOpenExternal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📂 ABRIR CON..."
+            android:textSize="12sp"
+            android:layout_marginStart="4dp"
+            android:backgroundTint="@color/primary_color" />
+
+    </LinearLayout>
+
+    <!-- Lista de datos -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+
+    </HorizontalScrollView>
+
+    <!-- Footer informativo -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 Modo edición: Toca las celdas para editarlas • Agrega filas/columnas • Cálculos automáticos"
+        android:textSize="10sp"
+        android:textColor="@color/gray"
+        android:gravity="center"
+        android:padding="8dp"
+        android:background="@color/light_gray" />
+
+</LinearLayout>

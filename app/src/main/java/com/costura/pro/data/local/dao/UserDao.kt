@@ -25,6 +25,13 @@ interface UserDao {
     @Query("UPDATE users SET isActive = :isActive WHERE id = :userId")
     suspend fun updateUserStatus(userId: String, isActive: Boolean)
 
+    // NUEVOS MÉTODOS para estadísticas
+    @Query("UPDATE users SET totalEarnings = :earnings, monthlyProduction = :production, lastAttendanceDate = :attendanceDate WHERE id = :userId")
+    suspend fun updateUserStats(userId: String, earnings: Double, production: Int, attendanceDate: String?)
+
+    @Query("SELECT totalEarnings FROM users WHERE id = :userId")
+    suspend fun getUserEarnings(userId: String): Double?
+
     @Query("DELETE FROM users")
     suspend fun clearAll()
 }

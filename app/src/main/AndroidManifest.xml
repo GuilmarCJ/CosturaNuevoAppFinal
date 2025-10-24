@@ -51,12 +51,44 @@
             android:name=".ui.admin.ManageOperationsActivity"
             android:exported="false" />
 
+        <!-- NUEVA ACTIVIDAD: Gestionar Máquinas -->
+        <activity
+            android:name=".ui.admin.ManageMachinesActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.admin.MachineHistoryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.admin.ExcelActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.NotesActivity"
+            android:exported="false" />
+
+        <!-- Provider para archivos -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <!-- Nuevas actividades para QR y Asistencia -->
         <activity android:name=".ui.attendance.AttendanceActivity" android:exported="false"/>
         <activity android:name=".ui.attendance.QRScannerActivity" android:exported="false"/>
         <activity android:name=".ui.attendance.QRGeneratorActivity" android:exported="false"/>
         <activity android:name=".ui.attendance.AttendanceHistoryActivity" android:exported="false"/>
 
+        <!--neubas para exel -->
+        <activity
+            android:name=".ui.admin.FileViewerActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
     </application>
 
 </manifest>

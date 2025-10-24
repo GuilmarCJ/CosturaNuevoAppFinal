@@ -21,54 +21,36 @@ enum class AttendanceStatus {
 
 
 data class QRCodeData(
-    val type: QRType,
-    val locationId: String = "costura_pro",
-    val uniqueId: String = "", // ID único para cada QR
-    val isPermanent: Boolean = true // Indica si el QR es permanente
+    val locationId: String = "costura_pro"
 ) {
     fun toJsonString(): String {
         return """{
-            "type":"${type.name}",
-            "locationId":"$locationId",
-            "uniqueId":"$uniqueId",
-            "isPermanent":$isPermanent
+            "locationId":"$locationId"
         }""".trimIndent()
     }
 
-    // En QRCodeData.kt - MEJORAR EL MÉTODO fromJsonString
     companion object {
         fun fromJsonString(json: String): QRCodeData? {
             return try {
-                // Limpiar y normalizar el JSON
                 val cleanJson = json.trim()
-                    .replace("\\s".toRegex(), "") // Eliminar espacios en blanco
-                    .replace("\\n".toRegex(), "") // Eliminar saltos de línea
+                    .replace("\\s".toRegex(), "")
+                    .replace("\\n".toRegex(), "")
 
                 Log.d("QRParser", "JSON limpio: $cleanJson")
 
-                // Extraer campos de manera más robusta
-                val typeMatch = "\"type\":\"([^\"]+)\"".toRegex().find(cleanJson)
                 val locationIdMatch = "\"locationId\":\"([^\"]+)\"".toRegex().find(cleanJson)
-                val uniqueIdMatch = "\"uniqueId\":\"([^\"]+)\"".toRegex().find(cleanJson)
-                val isPermanentMatch = "\"isPermanent\":(true|false)".toRegex().find(cleanJson)
 
-                if (typeMatch == null || locationIdMatch == null || uniqueIdMatch == null || isPermanentMatch == null) {
+                if (locationIdMatch == null) {
                     Log.e("QRParser", "Faltan campos en el JSON: $cleanJson")
                     return null
                 }
 
-                val type = typeMatch.groupValues[1]
                 val locationId = locationIdMatch.groupValues[1]
-                val uniqueId = uniqueIdMatch.groupValues[1]
-                val isPermanent = isPermanentMatch.groupValues[1].toBoolean()
 
-                Log.d("QRParser", "Campos extraídos: type=$type, locationId=$locationId, uniqueId=$uniqueId, isPermanent=$isPermanent")
+                Log.d("QRParser", "Campos extraídos: locationId=$locationId")
 
                 QRCodeData(
-                    type = QRType.valueOf(type),
-                    locationId = locationId,
-                    uniqueId = uniqueId,
-                    isPermanent = isPermanent
+                    locationId = locationId
                 )
             } catch (e: Exception) {
                 Log.e("QRParser", "Error parseando JSON: $json", e)
@@ -81,4 +63,3 @@ data class QRCodeData(
 enum class QRType {
     ENTRY, EXIT
 }
-

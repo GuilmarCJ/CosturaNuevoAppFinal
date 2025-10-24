@@ -16,6 +16,10 @@ import kotlinx.coroutines.tasks.await
 import org.joda.time.DateTime
 import org.joda.time.LocalTime
 import java.util.*
+import com.costura.pro.data.model.FirebaseAttendance
+import com.google.firebase.Timestamp
+
+
 
 class AttendanceRepository(
     private val attendanceDao: AttendanceDao
@@ -43,10 +47,11 @@ class AttendanceRepository(
     suspend fun registerEntry(workerId: String, workerName: String): Boolean {
         return try {
             val now = DateTime()
-            val date = now.toString("yyyy-MM-dd")
-            val time = now.toString("HH:mm")
+            val date = now.toString(Constants.DATE_FORMAT)
+            val time = now.toString(Constants.TIME_FORMAT)
+            val yearMonth = now.toString(Constants.YEAR_MONTH_FORMAT)
 
-            Log.d("AttendanceRepository", "🔄 Registrando entrada para $workerName ($workerId) a las $time")
+            Log.d("AttendanceRepository", "🔄 Registrando ENTRADA para $workerName ($workerId) a las $time")
 
             // Verificar si ya existe un registro para hoy
             val existingRecord = getAttendanceByWorkerAndDate(workerId, date)
@@ -68,7 +73,7 @@ class AttendanceRepository(
 
                 Log.d("AttendanceRepository", "📝 Creando registro con ID: $attendanceId, Status: $status")
 
-                // Guardar en Firebase directamente
+                // Guardar en Firebase con NUEVA ESTRUCTURA
                 val success = saveAttendanceToFirebase(
                     attendanceId = attendanceId,
                     workerId = workerId,
@@ -76,11 +81,15 @@ class AttendanceRepository(
                     date = date,
                     entryTime = time,
                     exitTime = null,
-                    status = status
+                    status = status,
+                    yearMonth = yearMonth
                 )
 
                 if (success) {
                     Log.d("AttendanceRepository", "✅ Entrada guardada exitosamente en Firebase")
+
+                    // Actualizar estadísticas del usuario
+                    updateUserAttendanceStats(workerId, date)
 
                     // También guardar localmente para cache
                     val attendanceEntity = AttendanceEntity(
@@ -92,14 +101,15 @@ class AttendanceRepository(
                         exitTime = null,
                         status = status.name,
                         createdAt = System.currentTimeMillis(),
-                        isSynced = true // Ya está sincronizado
+                        isSynced = true,
+                        yearMonth = yearMonth
                     )
                     attendanceDao.insertAttendance(attendanceEntity)
+                    true
                 } else {
                     Log.e("AttendanceRepository", "❌ Error guardando en Firebase")
+                    false
                 }
-
-                success
             }
         } catch (e: Exception) {
             Log.e("AttendanceRepository", "❌ Excepción en registerEntry", e)
@@ -107,31 +117,30 @@ class AttendanceRepository(
         }
     }
 
-
     suspend fun registerExit(workerId: String): Boolean {
         return try {
-            val today = DateTime().toString("yyyy-MM-dd")
-            val currentTime = DateTime().toString("HH:mm")
+            val today = DateTime().toString(Constants.DATE_FORMAT)
+            val currentTime = DateTime().toString(Constants.TIME_FORMAT)
 
-            Log.d("AttendanceRepository", "🔄 Registrando salida para $workerId a las $currentTime")
+            Log.d("AttendanceRepository", "🔄 Registrando SALIDA para $workerId a las $currentTime")
 
             val existingRecord = getAttendanceByWorkerAndDate(workerId, today)
 
             if (existingRecord != null && existingRecord.exitTime == null) {
                 Log.d("AttendanceRepository", "📝 Actualizando salida para registro existente")
 
-                // Actualizar en Firebase
-                val success = updateExitTimeInFirebase(existingRecord.id, currentTime)
+                // Actualizar en Firebase con NUEVA ESTRUCTURA
+                val success = updateExitTimeInFirebase(workerId, existingRecord.id, currentTime)
 
                 if (success) {
                     // Actualizar localmente
                     attendanceDao.updateExitTime(existingRecord.id, currentTime)
                     Log.d("AttendanceRepository", "✅ Salida registrada exitosamente")
+                    true
                 } else {
                     Log.e("AttendanceRepository", "❌ Error actualizando salida en Firebase")
+                    false
                 }
-
-                success
             } else {
                 Log.w("AttendanceRepository", "⚠️ No se encontró registro de entrada para hoy o ya tiene salida")
                 false
@@ -142,7 +151,6 @@ class AttendanceRepository(
         }
     }
 
-
     private suspend fun saveAttendanceToFirebase(
         attendanceId: String,
         workerId: String,
@@ -150,26 +158,28 @@ class AttendanceRepository(
         date: String,
         entryTime: String,
         exitTime: String?,
-        status: AttendanceStatus
+        status: AttendanceStatus,
+        yearMonth: String
     ): Boolean {
         return try {
-            val attendanceData = hashMapOf(
-                "workerId" to workerId,
-                "workerName" to workerName,
-                "date" to date,
-                "entryTime" to entryTime,
-                "exitTime" to exitTime,
-                "status" to status.name,
-                "createdAt" to com.google.firebase.Timestamp.now(),
-                "updatedAt" to com.google.firebase.Timestamp.now()
+            val firebaseAttendance = FirebaseAttendance(
+                id = attendanceId,
+                date = date,
+                entryTime = entryTime,
+                exitTime = exitTime,
+                status = status.name,
+                yearMonth = yearMonth
             )
 
-            db.collection(Constants.COLLECTION_ATTENDANCE)
+            // NUEVA ESTRUCTURA: Guardar en subcolección del usuario
+            db.collection(Constants.COLLECTION_USERS)
+                .document(workerId)
+                .collection(Constants.SUBCOLLECTION_ATTENDANCE)
                 .document(attendanceId)
-                .set(attendanceData)
+                .set(firebaseAttendance)
                 .await()
 
-            Log.d("AttendanceRepository", "🔥 Registro guardado en Firebase: $attendanceId")
+            Log.d("AttendanceRepository", "🔥 Registro guardado en subcolección: $attendanceId")
             true
         } catch (e: Exception) {
             Log.e("AttendanceRepository", "❌ Error guardando en Firebase: ${e.message}")
@@ -177,19 +187,21 @@ class AttendanceRepository(
         }
     }
 
-    private suspend fun updateExitTimeInFirebase(attendanceId: String, exitTime: String): Boolean {
+    private suspend fun updateExitTimeInFirebase(workerId: String, attendanceId: String, exitTime: String): Boolean {
         return try {
             val updates = hashMapOf<String, Any>(
-                "exitTime" to exitTime,
-                "updatedAt" to com.google.firebase.Timestamp.now()
+                "exitTime" to exitTime
             )
 
-            db.collection(Constants.COLLECTION_ATTENDANCE)
+            // NUEVA ESTRUCTURA: Actualizar en subcolección del usuario
+            db.collection(Constants.COLLECTION_USERS)
+                .document(workerId)
+                .collection(Constants.SUBCOLLECTION_ATTENDANCE)
                 .document(attendanceId)
                 .update(updates)
                 .await()
 
-            Log.d("AttendanceRepository", "🔥 Salida actualizada en Firebase: $attendanceId -> $exitTime")
+            Log.d("AttendanceRepository", "🔥 Salida actualizada en subcolección: $attendanceId -> $exitTime")
             true
         } catch (e: Exception) {
             Log.e("AttendanceRepository", "❌ Error actualizando salida en Firebase: ${e.message}")
@@ -197,21 +209,140 @@ class AttendanceRepository(
         }
     }
 
-    private suspend fun syncToFirebase(attendance: AttendanceEntity) {
+    private suspend fun updateUserAttendanceStats(workerId: String, date: String) {
         try {
-            val attendanceData = hashMapOf(
-                "workerId" to attendance.workerId,
-                "workerName" to attendance.workerName,
-                "date" to attendance.date,
-                "entryTime" to attendance.entryTime,
-                "exitTime" to attendance.exitTime,
-                "status" to attendance.status,
-                "createdAt" to com.google.firebase.Timestamp.now()
+            val updates = hashMapOf<String, Any>(
+                "stats.lastAttendanceDate" to date,
+                "stats.workedDays" to com.google.firebase.firestore.FieldValue.increment(1),
+                "timestamps.lastActive" to Timestamp.now()
             )
 
-            db.collection(Constants.COLLECTION_ATTENDANCE)
+            db.collection(Constants.COLLECTION_USERS)
+                .document(workerId)
+                .update(updates)
+                .await()
+        } catch (e: Exception) {
+            Log.e("AttendanceRepository", "Error actualizando stats de usuario: ${e.message}")
+        }
+    }
+
+    // Métodos existentes actualizados para nueva estructura
+    suspend fun getAttendanceByWorkerAndDate(workerId: String, date: String): AttendanceRecord? {
+        return try {
+            val documents = db.collection(Constants.COLLECTION_USERS)
+                .document(workerId)
+                .collection(Constants.SUBCOLLECTION_ATTENDANCE)
+                .whereEqualTo("date", date)
+                .get()
+                .await()
+
+            if (documents.isEmpty) {
+                null
+            } else {
+                val document = documents.documents[0]
+                val firebaseAttendance = document.toObject(FirebaseAttendance::class.java)
+
+                firebaseAttendance?.let {
+                    AttendanceRecord(
+                        id = it.id,
+                        workerId = workerId,
+                        workerName = "", // Necesitaríamos obtener el nombre del usuario
+                        date = it.date,
+                        entryTime = it.entryTime,
+                        exitTime = it.exitTime,
+                        status = AttendanceStatus.valueOf(it.status),
+                        createdAt = Date() // Podríamos agregar timestamp a FirebaseAttendance
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun getAttendanceHistory(workerId: String, endDate: DateTime): List<AttendanceRecord> {
+        return try {
+            val startDate = endDate.minusDays(30)
+            val startDateStr = startDate.toString(Constants.DATE_FORMAT)
+            val endDateStr = endDate.toString(Constants.DATE_FORMAT)
+
+            val documents = db.collection(Constants.COLLECTION_USERS)
+                .document(workerId)
+                .collection(Constants.SUBCOLLECTION_ATTENDANCE)
+                .whereGreaterThanOrEqualTo("date", startDateStr)
+                .whereLessThanOrEqualTo("date", endDateStr)
+                .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .await()
+
+            documents.map { document ->
+                val firebaseAttendance = document.toObject(FirebaseAttendance::class.java)
+                AttendanceRecord(
+                    id = firebaseAttendance.id,
+                    workerId = workerId,
+                    workerName = "", // Necesitaríamos obtener el nombre
+                    date = firebaseAttendance.date,
+                    entryTime = firebaseAttendance.entryTime,
+                    exitTime = firebaseAttendance.exitTime,
+                    status = AttendanceStatus.valueOf(firebaseAttendance.status),
+                    createdAt = Date()
+                )
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    // Mantener métodos de QR
+    fun generateQRCodeData(type: QRType): String {
+        val qrData = QRManager.generatePermanentQR(type)
+        return qrData.toJsonString()
+    }
+
+    fun parseQRCodeData(qrContent: String): QRCodeData? {
+        return QRCodeData.fromJsonString(qrContent)
+    }
+
+    data class AttendanceStatistics(
+        val workedDays: Int,
+        val onTimeDays: Int,
+        val lateDays: Int,
+        val absentDays: Int
+    )
+
+    suspend fun getAttendanceStatistics(workerId: String, month: DateTime): AttendanceStatistics {
+        val records = getAttendanceHistory(workerId, month)
+
+        val workedDays = records.count { it.entryTime != "--:--" }
+        val onTimeDays = records.count { it.status == AttendanceStatus.PRESENT }
+        val lateDays = records.count { it.status == AttendanceStatus.LATE }
+        val absentDays = records.count { it.status == AttendanceStatus.ABSENT }
+
+        return AttendanceStatistics(
+            workedDays = workedDays,
+            onTimeDays = onTimeDays,
+            lateDays = lateDays,
+            absentDays = absentDays
+        )
+    }
+
+    // Sincronización actualizada
+    private suspend fun syncToFirebase(attendance: AttendanceEntity) {
+        try {
+            val firebaseAttendance = FirebaseAttendance(
+                id = attendance.id,
+                date = attendance.date,
+                entryTime = attendance.entryTime,
+                exitTime = attendance.exitTime,
+                status = attendance.status,
+                yearMonth = attendance.yearMonth
+            )
+
+            db.collection(Constants.COLLECTION_USERS)
+                .document(attendance.workerId)
+                .collection(Constants.SUBCOLLECTION_ATTENDANCE)
                 .document(attendance.id)
-                .set(attendanceData)
+                .set(firebaseAttendance)
                 .await()
 
             attendanceDao.markAsSynced(attendance.id)
@@ -231,109 +362,4 @@ class AttendanceRepository(
             // Handle sync error
         }
     }
-
-    fun generateQRCodeData(type: QRType): String {
-        val qrData = QRManager.generatePermanentQR(type)
-        return qrData.toJsonString()
-    }
-
-    fun parseQRCodeData(qrContent: String): com.costura.pro.data.model.QRCodeData? {
-        return com.costura.pro.data.model.QRCodeData.fromJsonString(qrContent)
-    }
-
-    private fun handleQRRegistration(qrData: QRCodeData): Boolean {
-        return if (QRManager.isQRValid(qrData)) {
-            // Marcar QR como usado
-            QRManager.markQRAsUsed(qrData)
-            true
-        } else {
-            false
-        }
-    }
-
-    // Añadir estos métodos al AttendanceRepository existente
-
-    // Añadir este método al AttendanceRepository
-    suspend fun getAttendanceHistory(workerId: String, endDate: DateTime): List<AttendanceRecord> {
-        return try {
-            val startDate = endDate.minusDays(30) // Últimos 30 días
-            val startDateStr = startDate.toString("yyyy-MM-dd")
-            val endDateStr = endDate.toString("yyyy-MM-dd")
-
-            val documents = db.collection(Constants.COLLECTION_ATTENDANCE)
-                .whereEqualTo("workerId", workerId)
-                .whereGreaterThanOrEqualTo("date", startDateStr)
-                .whereLessThanOrEqualTo("date", endDateStr)
-                .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                .get()
-                .await()
-
-            documents.map { document ->
-                AttendanceRecord(
-                    id = document.id,
-                    workerId = document.getString("workerId") ?: "",
-                    workerName = document.getString("workerName") ?: "",
-                    date = document.getString("date") ?: "",
-                    entryTime = document.getString("entryTime") ?: "--:--",
-                    exitTime = document.getString("exitTime"),
-                    status = AttendanceStatus.valueOf(document.getString("status") ?: "ABSENT"),
-                    createdAt = (document.get("createdAt") as? com.google.firebase.Timestamp)?.toDate() ?: Date()
-                )
-            }
-        } catch (e: Exception) {
-            emptyList() // Si hay error, retornar lista vacía
-        }
-    }
-
-    // En AttendanceRepository.kt - Añadir este método
-    suspend fun getAttendanceByWorkerAndDate(workerId: String, date: String): AttendanceRecord? {
-        return try {
-            val documents = db.collection(Constants.COLLECTION_ATTENDANCE)
-                .whereEqualTo("workerId", workerId)
-                .whereEqualTo("date", date)
-                .get()
-                .await()
-
-            if (documents.isEmpty) {
-                null
-            } else {
-                val document = documents.documents[0]
-                AttendanceRecord(
-                    id = document.id,
-                    workerId = document.getString("workerId") ?: "",
-                    workerName = document.getString("workerName") ?: "",
-                    date = document.getString("date") ?: "",
-                    entryTime = document.getString("entryTime") ?: "--:--",
-                    exitTime = document.getString("exitTime"),
-                    status = AttendanceStatus.valueOf(document.getString("status") ?: "ABSENT"),
-                    createdAt = (document.get("createdAt") as? com.google.firebase.Timestamp)?.toDate() ?: Date()
-                )
-            }
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    suspend fun getAttendanceStatistics(workerId: String, month: DateTime): AttendanceStatistics {
-        val records = getAttendanceHistory(workerId, month)
-
-        val workedDays = records.count { it.entryTime != "--:--" }
-        val onTimeDays = records.count { it.status == AttendanceStatus.PRESENT }
-        val lateDays = records.count { it.status == AttendanceStatus.LATE }
-        val absentDays = records.count { it.status == AttendanceStatus.ABSENT }
-
-        return AttendanceStatistics(
-            workedDays = workedDays,
-            onTimeDays = onTimeDays,
-            lateDays = lateDays,
-            absentDays = absentDays
-        )
-    }
-
-    data class AttendanceStatistics(
-        val workedDays: Int,
-        val onTimeDays: Int,
-        val lateDays: Int,
-        val absentDays: Int
-    )
 }

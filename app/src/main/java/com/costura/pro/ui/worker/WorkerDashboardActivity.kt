@@ -14,6 +14,10 @@ import com.costura.pro.utils.Constants
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class WorkerDashboardActivity : AppCompatActivity() {
 
@@ -22,6 +26,9 @@ class WorkerDashboardActivity : AppCompatActivity() {
     private val db = FirebaseFirestore.getInstance()
     private val operationsList = mutableListOf<Operation>()
     private lateinit var operationsAdapter: WorkerOperationsAdapter
+
+    // NUEVO: Scope para corrutinas
+    private val scope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,10 +59,14 @@ class WorkerDashboardActivity : AppCompatActivity() {
 
     private fun loadOperations() {
         showLoading(true)
-        db.collection(Constants.COLLECTION_OPERATIONS)
-            .whereEqualTo("isActive", true)
-            .get()
-            .addOnSuccessListener { documents ->
+
+        scope.launch {
+            try {
+                val documents = db.collection(Constants.COLLECTION_OPERATIONS)
+                    .whereEqualTo("isActive", true)
+                    .get()
+                    .await()
+
                 operationsList.clear()
                 for (document in documents) {
                     val operation = Operation(
@@ -69,11 +80,11 @@ class WorkerDashboardActivity : AppCompatActivity() {
 
                 setupOperationsRecyclerView()
                 showLoading(false)
-            }
-            .addOnFailureListener { exception ->
+            } catch (exception: Exception) {
                 showLoading(false)
-                Toast.makeText(this, "Error cargando operaciones: ${exception.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@WorkerDashboardActivity, "Error cargando operaciones: ${exception.message}", Toast.LENGTH_SHORT).show()
             }
+        }
     }
 
     private fun setupOperationsRecyclerView() {
@@ -88,47 +99,44 @@ class WorkerDashboardActivity : AppCompatActivity() {
 
     private fun registerProduction(operation: Operation, quantity: Int) {
         val workerId = preferences.userId ?: return
-        val totalPayment = quantity * operation.paymentPerUnit
+        val workerName = preferences.username ?: ""
 
-        val productionData = hashMapOf(
-            "workerId" to workerId,
-            "operationId" to operation.id,
-            "operationName" to operation.name,
-            "quantity" to quantity,
-            "paymentPerUnit" to operation.paymentPerUnit,
-            "totalPayment" to totalPayment,
-            "date" to com.google.firebase.Timestamp.now()
-        )
+        scope.launch {
+            try {
+                val productionRepository = (application as com.costura.pro.CosturaProApp).productionRepository
+                val success = productionRepository.registerProduction(
+                    workerId = workerId,
+                    operationId = operation.id,
+                    operationName = operation.name,
+                    paymentPerUnit = operation.paymentPerUnit,
+                    quantity = quantity
+                )
 
-        db.collection(Constants.COLLECTION_PRODUCTION)
-            .add(productionData)
-            .addOnSuccessListener {
-                Toast.makeText(this, "Registrado: +S/ ${String.format("%.2f", totalPayment)}", Toast.LENGTH_SHORT).show()
-                loadTotalEarned()
-                operationsAdapter.notifyDataSetChanged() // Refresh today's counts
+                if (success) {
+                    Toast.makeText(this@WorkerDashboardActivity, "Registrado: +S/ ${String.format("%.2f", quantity * operation.paymentPerUnit)}", Toast.LENGTH_SHORT).show()
+                    loadTotalEarned()
+                    operationsAdapter.notifyDataSetChanged()
+                } else {
+                    Toast.makeText(this@WorkerDashboardActivity, "Error registrando producción", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this@WorkerDashboardActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
-            .addOnFailureListener { exception ->
-                Toast.makeText(this, "Error registrando producción: ${exception.message}", Toast.LENGTH_SHORT).show()
-            }
+        }
     }
-
 
     private fun loadTotalEarned() {
         val workerId = preferences.userId ?: return
 
-        db.collection(Constants.COLLECTION_PRODUCTION)
-            .whereEqualTo("workerId", workerId)
-            .get()
-            .addOnSuccessListener { documents ->
-                var totalEarned = 0.0
-                for (document in documents) {
-                    totalEarned += document.getDouble("totalPayment") ?: 0.0
-                }
-                binding.tvTotalEarned.text = "S/ ${String.format("%.2f", totalEarned)}"
-            }
-            .addOnFailureListener { exception ->
+        scope.launch {
+            try {
+                val productionRepository = (application as com.costura.pro.CosturaProApp).productionRepository
+                val totalEarnings = productionRepository.getTotalEarnings(workerId) ?: 0.0
+                binding.tvTotalEarned.text = "S/ ${String.format("%.2f", totalEarnings)}"
+            } catch (e: Exception) {
                 binding.tvTotalEarned.text = "S/ 0.00"
             }
+        }
     }
 
     private fun logout() {
@@ -141,6 +149,4 @@ class WorkerDashboardActivity : AppCompatActivity() {
     private fun showLoading(show: Boolean) {
         binding.progressBar.visibility = if (show) android.view.View.VISIBLE else android.view.View.GONE
     }
-
-
 }
