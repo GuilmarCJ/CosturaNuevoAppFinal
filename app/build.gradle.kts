@@ -21,41 +21,13 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-        debug {
             isMinifyEnabled = false
-            applicationIdSuffix = ".debug"
-        }
-    }
-
-
-    signingConfigs {
-        create("release") {
-            storeFile = file("keystore.jks")
-            storePassword = "Atlas123"
-            keyAlias = "key0"
-            keyPassword = "Atlas123"
-        }
-    }
-
-    buildTypes {
-        getByName("release") {
-            signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = true
-            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -65,15 +37,6 @@ android {
     }
     buildFeatures {
         viewBinding = true
-    }
-
-    // Opcional: Para reducir el tamaño del APK
-    buildTypes {
-        release {
-            isDebuggable = false
-            isJniDebuggable = false
-            isRenderscriptDebuggable = false
-        }
     }
 }
 
@@ -94,6 +57,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation("com.google.android.material:material:1.11.0")
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))

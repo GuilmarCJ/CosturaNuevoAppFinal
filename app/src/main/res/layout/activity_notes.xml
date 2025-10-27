@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/primary_color"
-        app:title="BLOC DE NOTAS"
+        app:title="Bloc de Notas"
         app:titleTextColor="@color/white" />
 
     <!-- Barra de estado -->
@@ -26,7 +26,7 @@
         android:padding="8dp"
         android:gravity="center" />
 
-    <!-- Barra de herramientas principal -->
+    <!-- Barra superior - Operaciones básicas -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,9 +39,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="📄 NUEVO"
-            android:textSize="10sp"
-            android:layout_marginEnd="2dp"
+            android:text="NUEVO"
+            android:textSize="12sp"
+            android:layout_marginEnd="4dp"
             android:backgroundTint="@color/info_blue" />
 
         <Button
@@ -49,9 +49,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="💾 GUARDAR"
-            android:textSize="10sp"
-            android:layout_marginHorizontal="2dp"
+            android:text="GUARDAR"
+            android:textSize="12sp"
+            android:layout_marginHorizontal="4dp"
             android:backgroundTint="@color/success_green" />
 
         <Button
@@ -59,9 +59,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="📂 CARGAR"
-            android:textSize="10sp"
-            android:layout_marginHorizontal="2dp"
+            android:text="CARGAR"
+            android:textSize="12sp"
+            android:layout_marginHorizontal="4dp"
             android:backgroundTint="@color/primary_color" />
 
         <Button
@@ -69,84 +69,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="📤 COMPARTIR"
-            android:textSize="10sp"
-            android:layout_marginStart="2dp"
+            android:text="COMPARTIR"
+            android:textSize="12sp"
+            android:layout_marginStart="4dp"
             android:backgroundTint="@color/info_blue" />
 
     </LinearLayout>
-
-    <!-- Barra de herramientas de formato -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@color/light_gray"
-        android:padding="4dp">
-
-        <Button
-            android:id="@+id/btnFormatText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="🎨 FORMATO"
-            android:textSize="9sp"
-            android:layout_marginEnd="1dp"
-            android:backgroundTint="#FF9800" />
-
-        <Button
-            android:id="@+id/btnFindReplace"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="🔍 BUSCAR"
-            android:textSize="9sp"
-            android:layout_marginHorizontal="1dp"
-            android:backgroundTint="#9C27B0" />
-
-        <Button
-            android:id="@+id/btnWordCount"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="📊 CONTAR"
-            android:textSize="9sp"
-            android:layout_marginHorizontal="1dp"
-            android:backgroundTint="#607D8B" />
-
-        <Button
-            android:id="@+id/btnInsertTemplate"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="📋 PLANTILLA"
-            android:textSize="9sp"
-            android:layout_marginHorizontal="1dp"
-            android:backgroundTint="#795548" />
-
-        <Button
-            android:id="@+id/btnExportPdf"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="📄 EXPORTAR"
-            android:textSize="9sp"
-            android:layout_marginStart="1dp"
-            android:backgroundTint="#F44336" />
-
-    </LinearLayout>
-
-    <!-- Botón configuración flotante -->
-    <Button
-        android:id="@+id/btnSettings"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:text="⚙️"
-        android:textSize="16sp"
-        android:layout_gravity="end"
-        android:layout_margin="16dp"
-        android:backgroundTint="@color/primary_color"
-        android:elevation="8dp" />
 
     <!-- Área de texto principal -->
     <EditText
@@ -160,18 +88,46 @@
         android:background="@null"
         android:textSize="16sp"
         android:lineSpacingExtra="4dp"
-        android:scrollbars="vertical"
-        android:isScrollContainer="true" />
+        android:scrollbars="vertical" />
 
-    <!-- Footer informativo -->
-    <TextView
+    <!-- Barra inferior - Funciones avanzadas -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="💡 Consejo: Usa plantillas para listas de trabajo • Ctrl+F para buscar • Auto-guardado automático"
-        android:textSize="10sp"
-        android:textColor="@color/gray"
-        android:gravity="center"
-        android:padding="8dp"
-        android:background="@color/light_gray" />
+        android:orientation="horizontal"
+        android:background="@color/light_gray"
+        android:padding="8dp">
+
+        <Button
+            android:id="@+id/btnFormat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🎨 FORMATO"
+            android:textSize="11sp"
+            android:layout_marginEnd="2dp"
+            android:backgroundTint="#FF9800" />
+
+        <Button
+            android:id="@+id/btnTemplates"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📋 PLANTILLAS"
+            android:textSize="11sp"
+            android:layout_marginHorizontal="2dp"
+            android:backgroundTint="#9C27B0" />
+
+        <Button
+            android:id="@+id/btnTools"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🔧 HERRAMIENTAS"
+            android:textSize="11sp"
+            android:layout_marginStart="2dp"
+            android:backgroundTint="#607D8B" />
+
+    </LinearLayout>
 
 </LinearLayout>

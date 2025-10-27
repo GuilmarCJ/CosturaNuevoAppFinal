@@ -15,15 +15,13 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.costura.pro.R
 import com.costura.pro.databinding.ActivityFileViewerBinding
 import com.costura.pro.databinding.DialogEditCellBinding
-import com.costura.pro.databinding.DialogNewRowBinding
 import java.io.File
 import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.*
-
+import com.costura.pro.R
 class FileViewerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityFileViewerBinding
@@ -55,9 +53,14 @@ class FileViewerActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = CsvAdapter(csvData, headers) { row, col, newValue ->
-            editCell(row, col, newValue)
-        }
+        adapter = CsvAdapter(csvData, headers,
+            onCellEdit = { row, col, newValue ->
+                editCell(row, col, newValue)
+            },
+            onDeleteRow = { position ->
+                deleteRow(position)
+            }
+        )
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(this@FileViewerActivity)
             adapter = this@FileViewerActivity.adapter
@@ -79,6 +82,10 @@ class FileViewerActivity : AppCompatActivity() {
 
         binding.btnAddRow.setOnClickListener {
             addNewRow()
+        }
+
+        binding.btnAddColumn.setOnClickListener {
+            addNewColumn()
         }
 
         binding.btnSaveFile.setOnClickListener {
@@ -111,14 +118,14 @@ class FileViewerActivity : AppCompatActivity() {
 
     private fun updateUI() {
         if (isEditing) {
-            binding.toolbar.title = "${currentFile?.name} - Editando"
+            binding.toolbar.title = "${currentFile?.name ?: "Archivo"} - EDITANDO"
             binding.btnEditMode.text = "MODO VISUAL"
-            binding.btnEditMode.setBackgroundColor(ContextCompat.getColor(this, R.color.red_light))
+            binding.btnEditMode.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light))
             binding.layoutEditControls.visibility = View.VISIBLE
         } else {
             binding.toolbar.title = currentFile?.name ?: "Visor de Archivos"
             binding.btnEditMode.text = "MODO EDICIÓN"
-            binding.btnEditMode.setBackgroundColor(ContextCompat.getColor(this, R.color.green_light))
+            binding.btnEditMode.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_green_light))
             binding.layoutEditControls.visibility = View.GONE
         }
     }
@@ -129,9 +136,6 @@ class FileViewerActivity : AppCompatActivity() {
                 val filePath = intent.getStringExtra("file_path")
                 currentFile = File(filePath)
                 loadFileContent(currentFile!!)
-            }
-            intent.data != null -> {
-                loadFileFromUri(intent.data!!)
             }
             else -> {
                 Toast.makeText(this, "No se pudo cargar el archivo", Toast.LENGTH_SHORT).show()
@@ -160,9 +164,12 @@ class FileViewerActivity : AppCompatActivity() {
 
             // Si no hay datos, crear estructura básica
             if (csvData.isEmpty()) {
-                headers = mutableListOf("Columna 1", "Columna 2", "Columna 3")
+                headers = mutableListOf("Producto", "Cantidad", "Precio", "Total")
                 csvData.add(headers.toMutableList())
-                csvData.add(MutableList(headers.size) { "" })
+                // Agregar algunas filas de ejemplo
+                csvData.add(mutableListOf("Manga", "50", "0.40", "20.00"))
+                csvData.add(mutableListOf("Cuerpo", "30", "0.60", "18.00"))
+                csvData.add(mutableListOf("Cuello", "25", "0.35", "8.75"))
             } else {
                 headers = if (csvData.isNotEmpty()) {
                     csvData[0].toMutableList()
@@ -180,35 +187,6 @@ class FileViewerActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadFileFromUri(uri: Uri) {
-        try {
-            contentResolver.openInputStream(uri)?.use { inputStream ->
-                val content = inputStream.bufferedReader().readText()
-                // Procesar contenido como CSV
-                processCsvContent(content)
-                binding.toolbar.title = "Archivo cargado"
-                binding.tvFileInfo.text = "Archivo cargado desde aplicación externa"
-            }
-        } catch (e: Exception) {
-            Toast.makeText(this, "Error cargando archivo", Toast.LENGTH_LONG).show()
-            finish()
-        }
-    }
-
-    private fun processCsvContent(content: String) {
-        csvData.clear()
-        content.lines().forEach { line ->
-            if (line.isNotBlank()) {
-                val row = line.split(",").map { it.trim() }.toMutableList()
-                csvData.add(row)
-            }
-        }
-
-        headers = if (csvData.isNotEmpty()) csvData[0].toMutableList() else mutableListOf("Columna 1", "Columna 2", "Columna 3")
-        adapter.updateData(csvData, headers)
-        updateCalculations()
-    }
-
     private fun editCell(row: Int, col: Int, newValue: String) {
         if (row < csvData.size && col < csvData[row].size) {
             csvData[row][col] = newValue
@@ -219,20 +197,11 @@ class FileViewerActivity : AppCompatActivity() {
     }
 
     private fun addNewRow() {
-        val dialogBinding = DialogNewRowBinding.inflate(LayoutInflater.from(this))
-
-        AlertDialog.Builder(this)
-            .setTitle("Agregar Nueva Fila")
-            .setView(dialogBinding.root)
-            .setPositiveButton("Agregar") { _, _ ->
-                val newRow = MutableList(headers.size) { "" }
-                csvData.add(newRow)
-                adapter.updateData(csvData, headers)
-                isEditing = true
-                updateUI()
-            }
-            .setNegativeButton("Cancelar", null)
-            .show()
+        val newRow = MutableList(headers.size) { "" }
+        csvData.add(newRow)
+        adapter.updateData(csvData, headers)
+        isEditing = true
+        updateUI()
     }
 
     private fun addNewColumn() {
@@ -282,6 +251,8 @@ class FileViewerActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Toast.makeText(this, "Error guardando archivo: ${e.message}", Toast.LENGTH_LONG).show()
             }
+        } ?: run {
+            Toast.makeText(this, "No hay archivo para guardar", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -315,7 +286,7 @@ class FileViewerActivity : AppCompatActivity() {
 
     private fun updateCalculations() {
         if (csvData.size > 1) {
-            val calculations = StringBuilder()
+            val calculations = StringBuilder("📊 RESUMEN: ")
 
             // Calcular suma de columnas numéricas
             headers.forEachIndexed { index, header ->
@@ -324,17 +295,18 @@ class FileViewerActivity : AppCompatActivity() {
                 }
                 if (columnValues.isNotEmpty()) {
                     val sum = columnValues.sum()
-                    val avg = columnValues.average()
-                    calculations.append("$header: Suma=$sum, Promedio=${"%.2f".format(avg)}\n")
+                    calculations.append("$header=$${"%.2f".format(sum)} ")
                 }
             }
 
             binding.tvCalculations.text = calculations.toString()
+        } else {
+            binding.tvCalculations.text = "📊 Agrega datos para ver cálculos"
         }
     }
 
     private fun showCalculationsDialog() {
-        val calculations = StringBuilder("📊 RESUMEN ESTADÍSTICO\n\n")
+        val calculations = StringBuilder("📊 ESTADÍSTICAS DETALLADAS\n\n")
 
         if (csvData.size > 1) {
             headers.forEachIndexed { index, header ->
@@ -347,10 +319,10 @@ class FileViewerActivity : AppCompatActivity() {
                     val max = columnValues.maxOrNull() ?: 0.0
                     val min = columnValues.minOrNull() ?: 0.0
                     calculations.append("$header:\n")
-                    calculations.append("  • Suma: $sum\n")
-                    calculations.append("  • Promedio: ${"%.2f".format(avg)}\n")
-                    calculations.append("  • Máximo: $max\n")
-                    calculations.append("  • Mínimo: $min\n")
+                    calculations.append("  • Suma: $${"%.2f".format(sum)}\n")
+                    calculations.append("  • Promedio: $${"%.2f".format(avg)}\n")
+                    calculations.append("  • Máximo: $${"%.2f".format(max)}\n")
+                    calculations.append("  • Mínimo: $${"%.2f".format(min)}\n")
                     calculations.append("  • Registros: ${columnValues.size}\n\n")
                 }
             }
@@ -446,11 +418,12 @@ class FileViewerActivity : AppCompatActivity() {
     }
 }
 
-// Adapter para el RecyclerView
+// Adapter simplificado y funcional
 class CsvAdapter(
     private var data: MutableList<MutableList<String>>,
     private var headers: MutableList<String>,
-    private val onCellEdit: (Int, Int, String) -> Unit
+    private val onCellEdit: (Int, Int, String) -> Unit,
+    private val onDeleteRow: (Int) -> Unit
 ) : RecyclerView.Adapter<CsvAdapter.ViewHolder>() {
 
     private var isEditing = false
@@ -468,19 +441,20 @@ class CsvAdapter(
         holder.rowContainer.removeAllViews()
 
         val rowData = data[position]
+        val isHeaderRow = position == 0
 
         for (i in 0 until headers.size) {
             val cellValue = if (i < rowData.size) rowData[i] else ""
 
-            if (position == 0) {
-                // Encabezados
+            if (isHeaderRow) {
+                // Encabezados - siempre visibles como texto
                 val headerView = LayoutInflater.from(holder.itemView.context)
                     .inflate(R.layout.item_csv_header, holder.rowContainer, false)
                 val textView = headerView.findViewById<TextView>(R.id.tvHeader)
                 textView.text = headers[i]
                 holder.rowContainer.addView(headerView)
             } else {
-                // Celdas de datos
+                // Celdas de datos - editables en modo edición
                 val cellView = LayoutInflater.from(holder.itemView.context)
                     .inflate(R.layout.item_csv_cell, holder.rowContainer, false)
                 val textView = cellView.findViewById<TextView>(R.id.tvCell)
@@ -507,15 +481,20 @@ class CsvAdapter(
             }
         }
 
-        // Botón eliminar para filas de datos
-        if (position > 0 && isEditing) {
-            // En el botón eliminar:
+        // Botón eliminar para filas de datos en modo edición
+        if (!isHeaderRow && isEditing) {
             val deleteButton = Button(holder.itemView.context).apply {
                 text = "X"
-                setBackgroundColor(ContextCompat.getColor(holder.itemView.context, R.color.red_dark))
-                setTextColor(ContextCompat.getColor(holder.itemView.context, android.R.color.white))
+                setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_red_dark))
+                setTextColor(ContextCompat.getColor(context, android.R.color.white))
                 setOnClickListener {
-
+                    onDeleteRow(position)
+                }
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(8, 0, 0, 0)
                 }
             }
             holder.rowContainer.addView(deleteButton)
