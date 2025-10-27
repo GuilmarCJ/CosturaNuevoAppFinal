@@ -19,3 +19,24 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# Keep rules for Firebase
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+
+# Keep rules for Room
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class *
+
+# Keep rules for Apache POI
+-keep class org.apache.poi.** { *; }
+
+# Keep rules for coroutines
+-keep class kotlinx.coroutines.** { *; }
+
+# Keep view binding
+-keep class * extends androidx.viewbinding.ViewBinding { *; }
+
+# Keep data classes
+-keepclassmembers class * {
+    public <init>();
+}

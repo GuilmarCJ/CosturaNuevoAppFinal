@@ -21,13 +21,41 @@ android {
 
     buildTypes {
         release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+        debug {
             isMinifyEnabled = false
+            applicationIdSuffix = ".debug"
+        }
+    }
+
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("keystore.jks")
+            storePassword = "Atlas123"
+            keyAlias = "key0"
+            keyPassword = "Atlas123"
+        }
+    }
+
+    buildTypes {
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -37,6 +65,15 @@ android {
     }
     buildFeatures {
         viewBinding = true
+    }
+
+    // Opcional: Para reducir el tamaño del APK
+    buildTypes {
+        release {
+            isDebuggable = false
+            isJniDebuggable = false
+            isRenderscriptDebuggable = false
+        }
     }
 }
 
